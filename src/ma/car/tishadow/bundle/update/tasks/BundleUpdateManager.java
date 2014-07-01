@@ -32,4 +32,16 @@ public class BundleUpdateManager implements Task {
 	public boolean execute(TaskContext context) {
 		return this.taskChain.execute(context);
 	}
+
+	public static enum State {
+
+		CHECKED,
+		DOWNLOADED,
+		DECOMPRESSED,
+		READY_FOR_APPLY,
+		APPLYED,
+
+		DOWNLOADING,
+		APPLYING
+	}
 }

@@ -7,11 +7,13 @@
  */
 package ma.car.tishadow.bundle.update;
 
+import ma.car.tishadow.bundle.update.tasks.BundleUpdateManager;
+import ma.car.tishadow.bundle.update.tasks.TaskContext;
+
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
-
-import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.kroll.common.Log;
+import org.appcelerator.titanium.TiApplication;
 
 @Kroll.module(name = "TishadowBundleUpdate", id = "ma.car.tishadow.bundle.update")
 public class TishadowBundleUpdateModule extends KrollModule {
@@ -29,6 +31,7 @@ public class TishadowBundleUpdateModule extends KrollModule {
 
 		// Do some stuff when the app is created.
 		Log.i(TAG, "Tishadow Bundule Update Module loaded.");
+
 	}
 
 	// Public methods
@@ -39,6 +42,11 @@ public class TishadowBundleUpdateModule extends KrollModule {
 	@Kroll.method
 	public void doBundleUpdate() {
 
+		TaskContext context = new TaskContext();
+		context.setJavascriptContext(getKrollObject());
+		context.setApplicationContext(getActivity());
+
+		new BundleUpdateManager().execute(context);
 	}
 
 	@Kroll.method
