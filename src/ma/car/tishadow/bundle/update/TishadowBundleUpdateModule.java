@@ -16,11 +16,9 @@ import org.appcelerator.kroll.common.Log;
 @Kroll.module(name = "TishadowBundleUpdate", id = "ma.car.tishadow.bundle.update")
 public class TishadowBundleUpdateModule extends KrollModule {
 
-	// Standard Debugging variables
 	private static final String TAG = "TishadowBundleUpdateModule";
 
-	// You can define constants with @Kroll.constant, for example:
-	// @Kroll.constant public static final String EXTERNAL_NAME = value;
+	public static final long BACKWARD_COMPATIBLE_UID = 1L;
 
 	public TishadowBundleUpdateModule() {
 		super();
@@ -28,27 +26,24 @@ public class TishadowBundleUpdateModule extends KrollModule {
 
 	@Kroll.onAppCreate
 	public static void onAppCreate(TiApplication app) {
-		Log.d(TAG, "inside onAppCreate");
-		// put module init code that needs to run when the application is created
+
+		// Do some stuff when the app is created.
+		Log.i(TAG, "Tishadow Bundule Update Module loaded.");
 	}
 
-	// Methods
+	// Public methods
+	public void sendBundleUpdateRequest() {
+
+	}
+
 	@Kroll.method
-	public String example() {
-		Log.d(TAG, "example called");
-		return "hello world";
+	public void doBundleUpdate() {
+
 	}
 
-	// Properties
-	@Kroll.getProperty
-	public String getExampleProp() {
-		Log.d(TAG, "get example property");
-		return "hello world";
-	}
-
-	@Kroll.setProperty
-	public void setExampleProp(String value) {
-		Log.d(TAG, "set example property: " + value);
+	@Kroll.method
+	public String getBundleUpdateState() {
+		return null;
 	}
 
 }
