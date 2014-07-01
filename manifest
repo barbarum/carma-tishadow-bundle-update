@@ -1,0 +1,18 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 0.0.1-SNAPSHOT
+apiversion: 2
+description: This is a titanium android native module to implement asynchronized tishadow bundle update.
+author: Ding Wei
+license: Apache Public License, Version 2
+copyright: 2014 Carma Inc.
+
+
+# these should not be edited
+name: tishadow-bundle-update
+moduleid: ma.car.tishadow.bundle.update
+guid: 58ce77ad-2c2f-4d0f-bee6-466f1e1e3eba
+platform: android
+minsdk: 3.2.0.GA
