@@ -3,6 +3,7 @@
  */
 package ma.car.tishadow.bundle.update.tasks;
 
+import java.io.File;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -19,6 +20,7 @@ import android.database.Cursor;
 import android.net.Uri;
 
 /**
+ * Represents a task to download the specific bundle.
  * @author wei.ding
  */
 public class DownloadBundleTask implements Task {
@@ -55,16 +57,26 @@ public class DownloadBundleTask implements Task {
 
 		// Register ACTION_DOWNLOAD_COMPLETE event, and send download request to Android DownloadManager service.
 		Context applicationContext = context.getApplicationContext();
+
 		applicationContext.registerReceiver(newDownloadCompleteHandler(context), new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 		DownloadManager downloadManager = (DownloadManager) applicationContext.getSystemService(Context.DOWNLOAD_SERVICE);
 
-		DownloadManager.Request request = new DownloadManager.Request(Uri.parse(""));
-		request.setShowRunningNotification(Log.isDebugModeEnabled()).setVisibleInDownloadsUi(Log.isDebugModeEnabled());
+		String bundleDownloadUrl = (String) context.getContextProperties().get(TaskContext.Key.BUNDLE_DOWNLOAD_URL);
+		String latestBundleVersion = (String) context.getContextProperties().get(TaskContext.Key.LATEST_BUNDLE_VERSION);
+		String bundleDecompressDirectory = (String) context.getContextProperties().get(TaskContext.Key.BUNDLE_DECOMPRESS_DIRECTORY);
+		String bundleLocalFileName = bundleDecompressDirectory + ".zip";
+		File destination = new File(applicationContext.getExternalFilesDir(null), bundleLocalFileName);
 
+		DownloadManager.Request request = new DownloadManager.Request(Uri.parse(bundleDownloadUrl));
+		request.setShowRunningNotification(Log.isDebugModeEnabled()).setVisibleInDownloadsUi(Log.isDebugModeEnabled());
+		request.setDestinationUri(Uri.fromFile(destination));
 		long downloadId = downloadManager.enqueue(request);
 
 		context.getContextProperties().put(TaskContext.Key.DOWNLOADING_BUNDLE_REFID, new Long(downloadId));
+		context.getContextProperties().put(TaskContext.Key.DOWNLOAD_DESTINATION_FILENAME, bundleLocalFileName);
 		context.markedBundleUpdateProcessTo(BundleUpdateProcess.DOWNLOADING);
+
+		Log.i(TAG, "Downloading bundle '" + latestBundleVersion + "' from '" + bundleDownloadUrl + "' into directory '" + destination + "'... ");
 	}
 
 	/**
@@ -115,6 +127,8 @@ public class DownloadBundleTask implements Task {
 		}
 
 		cursor.close();
+
+		context.markedBundleUpdateProcessTo(BundleUpdateProcess.DOWNLOADED);
 	}
 
 }

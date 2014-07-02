@@ -119,8 +119,20 @@ public class TaskContext {
 
 	public static class Key {
 
+		/**
+		 * The key to get backup directory, which is used to backup current application, in case to recovery current version because any reason causes the
+		 * bundle update fails later.
+		 */
 		public static final String BACKUP_DIRECTORY = "standby_dir";
 
+		/**
+		 * The key to a directory which is used to decompress latest bundle download from specific server.
+		 */
+		public static final String BUNDLE_DECOMPRESS_DIRECTORY = "bundle_decompress_dir";
+
+		/**
+		 * Update type: must be either 'feature_toggle' or 'dev_update'.
+		 */
 		public static final String UPDATE_TYPE = "update_type";
 
 		/**
@@ -128,6 +140,12 @@ public class TaskContext {
 		 */
 		public static final String LATEST_BUNDLE_VERSION = "latest_bundle_version";
 
+		/**
+		 * The key to a remote URL to download the latest bundle
+		 */
+		public static final String BUNDLE_DOWNLOAD_URL = "bundle_download_url";
+
+		// Application's persistent properties keys
 		/**
 		 * The key to get the version number of the bundle which is working now.
 		 */
@@ -139,5 +157,10 @@ public class TaskContext {
 		 * returned.
 		 */
 		public static final String DOWNLOADING_BUNDLE_REFID = "__downloading_bundle_refid";
+
+		/**
+		 * Internal key to get filename for the bundle which will be download shortly.
+		 */
+		public static final String DOWNLOAD_DESTINATION_FILENAME = "__download_destination_filename";
 	}
 }
