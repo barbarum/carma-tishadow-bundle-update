@@ -42,9 +42,8 @@ public class TishadowBundleUpdateModule extends KrollModule {
 	@Kroll.method
 	public void doBundleUpdate() {
 
-		TaskContext context = new TaskContext();
+		TaskContext context = new TaskContext(getActivity());
 		context.setJavascriptContext(getKrollObject());
-		context.setApplicationContext(getActivity());
 
 		new BundleUpdateManager().execute(context);
 	}

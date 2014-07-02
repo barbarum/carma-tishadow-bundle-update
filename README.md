@@ -22,7 +22,7 @@ It's generally used to manage app's state, handle all javascript event callbacks
 </p>
 
 <p>
-<b>As mentioned above, all javascript event callbacks has been handled by runtime thread.</b> And most dynamic bundle update work has been done by TiShadow are some of these callbacks(<a target='_blank' href='https://github.com/miniman42/TiShadow/blob/master/app/Resources/api/Management.js'>source codes</a>).
+<b>As mentioned above, all javascript event callbacks has been handled by runtime thread.</b> And most dynamic bundle update work has been done by TiShadow are just some of these callbacks(<a target='_blank' href='https://github.com/miniman42/TiShadow/blob/master/app/Resources/api/Management.js'>source codes</a>).
 It's not a big problem until the app need a large update from tishadow server, or your app need very heavy work relying on event callbacks while launching. Heavy works are queued into a single thread and wait for being processed, this can cause your app significantly slow and very bad responsive.
 Even more, It seems that kroll runtime thread is not good at heavy work, and queued javascript callbacks can not been executed immediately even tasks later on have been returned.  So worse makes it even worse, and finally the app becomes slow, frozen, crashed very often, make you frustrated.
 </p>
@@ -34,3 +34,5 @@ So what the module does is to move bundle update away from runtime thread into 3
 
 Getting Started
 ======================
+
+

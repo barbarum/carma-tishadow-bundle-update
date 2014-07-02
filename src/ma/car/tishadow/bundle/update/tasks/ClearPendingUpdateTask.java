@@ -9,14 +9,17 @@ import java.io.IOException;
 import ma.car.tishadow.bundle.update.util.TiAppUtil;
 
 import org.apache.commons.io.FileUtils;
-
 import org.appcelerator.kroll.common.Log;
+
 import android.content.Context;
 
 /**
+ * Represents a single task to clear previous pending update.
  * @author wei.ding
  */
 public class ClearPendingUpdateTask implements Task {
+
+	private static final String TAG = "ClearPendingUpdateTask";
 
 	/*
 	 * (non-Javadoc)
@@ -27,15 +30,18 @@ public class ClearPendingUpdateTask implements Task {
 
 		Context applicationContext = context.getApplicationContext();
 
-		// TODO Change UpdateReady to false in Application Properties
+		context.getApplicationProperties().setBool(TiAppUtil.UPDATE_READY_KEY, false);
 
 		File appDataDirectory = applicationContext.getDir(TiAppUtil.APPLICATION_DATA_DIRECTORY_KEY, Context.MODE_PRIVATE);
-		File backupDirectory = new File(appDataDirectory, context.getStringValue(TaskContext.Key.BACKUP_DIRECTORY, TaskContext.Key.BACKUP_DIRECTORY));
+		File backupDirectory = new File(appDataDirectory, context.getApplicationProperties().getString(TaskContext.Key.BACKUP_DIRECTORY, TaskContext.Key.BACKUP_DIRECTORY));
+
+		Log.d(TAG, "AppDataDirectory : " + appDataDirectory + ", BackupDirectory : " + backupDirectory, Log.DEBUG_MODE);
 		try {
 			FileUtils.deleteDirectory(backupDirectory);
+			Log.i(TAG, "Clear pending update has been done.");
 			return true;
 		} catch (IOException e) {
-			Log.e("ClearPendingUpdateTask", "Failed to delete '" + backupDirectory + "'.", e);
+			Log.e(TAG, "Failed to delete '" + backupDirectory + "'.", e);
 		}
 		return false;
 	}

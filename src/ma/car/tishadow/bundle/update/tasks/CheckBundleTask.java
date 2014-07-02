@@ -14,8 +14,19 @@ public class CheckBundleTask implements Task {
 	 */
 	@Override
 	public boolean execute(TaskContext context) {
-		
+		String updateType = context.getApplicationProperties().getString(TaskContext.Key.UPDATE_TYPE, null);
+		if ("feature_toggle".equalsIgnoreCase(updateType)) {
+			if (!BundleUpdateManager.isLatestBundleApplied(context)) {
+				new ClearPendingUpdateTask().execute(context);
+			}
+			return true;
+		}
+		if ("dev_update".equalsIgnoreCase(updateType)) {
+			new ClearPendingUpdateTask().execute(context);
+			return true;
+		}
 		return false;
 	}
-
+	
+	
 }
