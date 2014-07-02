@@ -120,6 +120,11 @@ public class TaskContext {
 	public static class Key {
 
 		/**
+		 * The key to get app_name directory, where all current effective javascript files are.
+		 */
+		public static final String APP_NAME = "app_name";
+
+		/**
 		 * The key to get backup directory, which is used to backup current application, in case to recovery current version because any reason causes the
 		 * bundle update fails later.
 		 */
