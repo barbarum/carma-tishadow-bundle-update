@@ -2,7 +2,7 @@ tishadow-bundle-update
 ======================
 
 As the project name described, it provides <a href='https://github.com/miniman42/TiShadow' target='_blank'>TiShadow</a> the ability to do dynamic bundle update, but asynchronized. 
-This project is a titanium native module, and is installed as an external module into tishadow or your own titanium app.
+This project is a titanium android native module, and can be installed as an external module into tishadow or your own titanium app or a common titanium sdk native module.
 
 
 Why redo bundle update?
@@ -34,5 +34,5 @@ So what the module does is to move bundle update away from runtime thread into 3
 
 Getting Started
 ======================
--WIP
+---------Working in Progress
 
