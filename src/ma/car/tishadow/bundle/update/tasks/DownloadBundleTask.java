@@ -35,7 +35,7 @@ public class DownloadBundleTask implements Task {
 	 * @see ma.car.tishadow.bundle.update.tasks.Task#execute(ma.car.tishadow.bundle.update.tasks.TaskContext)
 	 */
 	@Override
-	public boolean execute(TaskContext context) {
+	public boolean execute(RequestContext context) {
 		if (!BundleUpdateManager.isBundleDownloadRequired(context)) {
 			return true;
 		}
@@ -53,7 +53,7 @@ public class DownloadBundleTask implements Task {
 		return false;
 	}
 
-	private void sendBundleDownloadRequest(TaskContext context) {
+	private void sendBundleDownloadRequest(RequestContext context) {
 
 		// Register ACTION_DOWNLOAD_COMPLETE event, and send download request to Android DownloadManager service.
 		Context applicationContext = context.getApplicationContext();
@@ -61,9 +61,9 @@ public class DownloadBundleTask implements Task {
 		applicationContext.registerReceiver(newDownloadCompleteHandler(context), new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 		DownloadManager downloadManager = (DownloadManager) applicationContext.getSystemService(Context.DOWNLOAD_SERVICE);
 
-		String bundleDownloadUrl = (String) context.getContextProperties().get(TaskContext.Key.BUNDLE_DOWNLOAD_URL);
-		String latestBundleVersion = (String) context.getContextProperties().get(TaskContext.Key.LATEST_BUNDLE_VERSION);
-		String bundleDecompressDirectory = (String) context.getContextProperties().get(TaskContext.Key.BUNDLE_DECOMPRESS_DIRECTORY);
+		String bundleDownloadUrl = (String) context.getContextProperties().get(RequestContext.Key.BUNDLE_DOWNLOAD_URL);
+		String latestBundleVersion = (String) context.getContextProperties().get(RequestContext.Key.LATEST_BUNDLE_VERSION);
+		String bundleDecompressDirectory = (String) context.getContextProperties().get(RequestContext.Key.BUNDLE_DECOMPRESS_DIRECTORY);
 		String bundleLocalFileName = bundleDecompressDirectory + ".zip";
 		File destination = new File(applicationContext.getExternalFilesDir(null), bundleLocalFileName);
 
@@ -72,8 +72,8 @@ public class DownloadBundleTask implements Task {
 		request.setDestinationUri(Uri.fromFile(destination));
 		long downloadId = downloadManager.enqueue(request);
 
-		context.getContextProperties().put(TaskContext.Key.DOWNLOADING_BUNDLE_REFID, new Long(downloadId));
-		context.getContextProperties().put(TaskContext.Key.DOWNLOAD_DESTINATION_FILENAME, bundleLocalFileName);
+		context.getContextProperties().put(RequestContext.Key.DOWNLOADING_BUNDLE_REFID, new Long(downloadId));
+		context.getContextProperties().put(RequestContext.Key.DOWNLOAD_DESTINATION_FILENAME, bundleLocalFileName);
 		context.markedBundleUpdateProcessTo(BundleUpdateProcess.DOWNLOADING);
 
 		Log.i(TAG, "Downloading bundle '" + latestBundleVersion + "' from '" + bundleDownloadUrl + "' into directory '" + destination + "'... ");
@@ -84,7 +84,7 @@ public class DownloadBundleTask implements Task {
 	 * @param context
 	 * @return
 	 */
-	private BroadcastReceiver newDownloadCompleteHandler(final TaskContext context) {
+	private BroadcastReceiver newDownloadCompleteHandler(final RequestContext context) {
 		return new BroadcastReceiver() {
 
 			// TODO The android default DownloadManager may not be stable because of an open bug <a
@@ -94,7 +94,7 @@ public class DownloadBundleTask implements Task {
 				lock.lock();
 				try {
 					long referenceId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L);
-					long storedReferenceId = (Long) context.getContextProperties().get(TaskContext.Key.DOWNLOADING_BUNDLE_REFID);
+					long storedReferenceId = (Long) context.getContextProperties().get(RequestContext.Key.DOWNLOADING_BUNDLE_REFID);
 					if (referenceId != -1 && referenceId == storedReferenceId) {
 						onBundleDownloadCompleted(context, intent);
 						waitForDownloadComplete.signal();
@@ -107,7 +107,7 @@ public class DownloadBundleTask implements Task {
 		};
 	}
 
-	private void onBundleDownloadCompleted(TaskContext context, Intent intent) {
+	private void onBundleDownloadCompleted(RequestContext context, Intent intent) {
 		long referenceId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
 
 		Query query = new Query();

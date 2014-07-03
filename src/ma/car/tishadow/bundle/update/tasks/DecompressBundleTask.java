@@ -26,10 +26,10 @@ public class DecompressBundleTask implements Task {
 	 * @see ma.car.tishadow.bundle.update.tasks.Task#execute(ma.car.tishadow.bundle.update.tasks.TaskContext)
 	 */
 	@Override
-	public boolean execute(TaskContext context) {
+	public boolean execute(RequestContext context) {
 		Context applicationContext = context.getApplicationContext();
-		String bundleDecompressDirectory = (String) context.getContextProperties().get(TaskContext.Key.BUNDLE_DECOMPRESS_DIRECTORY);
-		String filename = (String) context.getContextProperties().get(TaskContext.Key.DOWNLOAD_DESTINATION_FILENAME);
+		String bundleDecompressDirectory = (String) context.getContextProperties().get(RequestContext.Key.BUNDLE_DECOMPRESS_DIRECTORY);
+		String filename = (String) context.getContextProperties().get(RequestContext.Key.DOWNLOAD_DESTINATION_FILENAME);
 
 		File compressionFile = new File(applicationContext.getExternalFilesDir(null), filename);
 		File decompressDirectory = new File(applicationContext.getExternalFilesDir(null), bundleDecompressDirectory);

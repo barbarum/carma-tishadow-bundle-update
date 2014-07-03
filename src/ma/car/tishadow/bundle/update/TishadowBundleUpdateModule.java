@@ -8,7 +8,7 @@
 package ma.car.tishadow.bundle.update;
 
 import ma.car.tishadow.bundle.update.tasks.BundleUpdateManager;
-import ma.car.tishadow.bundle.update.tasks.TaskContext;
+import ma.car.tishadow.bundle.update.tasks.RequestContext;
 
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
@@ -42,7 +42,7 @@ public class TishadowBundleUpdateModule extends KrollModule {
 	@Kroll.method
 	public void doBundleUpdate() {
 
-		TaskContext context = new TaskContext(getActivity());
+		RequestContext context = new RequestContext(getActivity());
 		context.setJavascriptContext(getKrollObject());
 
 		new BundleUpdateManager().execute(context);

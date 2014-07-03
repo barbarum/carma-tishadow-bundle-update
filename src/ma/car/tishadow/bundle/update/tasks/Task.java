@@ -17,5 +17,5 @@ public interface Task {
 	/**
 	 * Executes current task.
 	 */
-	public boolean execute(TaskContext context);
+	public boolean execute(RequestContext context);
 }

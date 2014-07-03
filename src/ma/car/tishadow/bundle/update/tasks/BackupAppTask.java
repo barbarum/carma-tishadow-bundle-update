@@ -8,7 +8,6 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
-import android.content.Context;
 import android.util.Log;
 
 /**
@@ -25,13 +24,10 @@ public class BackupAppTask implements Task {
 	 * @see ma.car.tishadow.bundle.update.tasks.Task#execute(ma.car.tishadow.bundle.update.tasks.TaskContext)
 	 */
 	@Override
-	public boolean execute(TaskContext context) {
+	public boolean execute(RequestContext context) {
 
-		String backupProp = (String) context.getContextProperties().get(TaskContext.Key.BACKUP_DIRECTORY);
-		String sourceProp = (String) context.getContextProperties().get(TaskContext.Key.APP_NAME);
-
-		File backupDirectory = new File(context.getApplicationContext().getExternalFilesDir(null), backupProp);
-		File sourceDirectory = new File(context.getApplicationContext().getDir(sourceProp, Context.MODE_PRIVATE), sourceProp);
+		File backupDirectory = context.getBackupDirectory();
+		File sourceDirectory = context.getApplicationResourcesDirectory();
 
 		Log.i(TAG, "Backup application resources '" + sourceDirectory + "' -> '" + backupDirectory + "'...");
 		try {

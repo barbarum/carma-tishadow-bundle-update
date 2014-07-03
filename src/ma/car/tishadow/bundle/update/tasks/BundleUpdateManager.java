@@ -5,7 +5,7 @@ package ma.car.tishadow.bundle.update.tasks;
 
 import java.util.HashMap;
 
-import ma.car.tishadow.bundle.update.util.TiAppUtil;
+import ma.car.tishadow.bundle.update.util.TiAppUtil.PropertyKey;
 
 import org.appcelerator.titanium.TiProperties;
 
@@ -27,7 +27,7 @@ public class BundleUpdateManager implements Task {
 		SeriesTask downloadAndDecompressBundleTask = new SeriesTask().addToQueue(new DownloadBundleTask()).addToQueue(new DecompressBundleTask());
 		ParallelTask prepareToApplyBundleTask = new ParallelTask(downloadAndDecompressBundleTask, new BackupAppTask());
 
-		this.taskChain.addToQueue(new CheckBundleTask()).addToQueue(prepareToApplyBundleTask).addToQueue(new ApplyBundleUpdateTask());
+		this.taskChain.addToQueue(new CheckBundleTask()).addToQueue(prepareToApplyBundleTask).addToQueue(new ApplyUpdateTask());
 	}
 
 	/*
@@ -35,7 +35,7 @@ public class BundleUpdateManager implements Task {
 	 * @see ma.car.tishadow.bundle.update.tasks.Task#execute(ma.car.tishadow.bundle.update.tasks.TaskContext)
 	 */
 	@Override
-	public boolean execute(TaskContext context) {
+	public boolean execute(RequestContext context) {
 		return this.taskChain.execute(context);
 	}
 
@@ -44,13 +44,13 @@ public class BundleUpdateManager implements Task {
 	 * @param context the task context by request
 	 * @return true if applied, otherwise false
 	 */
-	public static boolean isLatestBundleApplied(TaskContext context) {
+	public static boolean isLatestBundleApplied(RequestContext context) {
 		TiProperties applicationProperties = context.getApplicationProperties();
 		HashMap<String, ?> contextProperties = context.getContextProperties();
 
-		boolean isUpdateReady = applicationProperties.getBool(TiAppUtil.UPDATE_READY_KEY, false);
-		long currentBundleVersion = applicationProperties.getInt(TaskContext.Key.CURRENT_BUNDLE_VERSION, -1);
-		Long latestBundleVersion = (Long) contextProperties.get(TaskContext.Key.LATEST_BUNDLE_VERSION);
+		boolean isUpdateReady = applicationProperties.getBool(PropertyKey.UPDATE_READY_KEY, false);
+		long currentBundleVersion = applicationProperties.getInt(PropertyKey.CURRENT_BUNDLE_VERSION, -1);
+		Long latestBundleVersion = (Long) contextProperties.get(RequestContext.Key.LATEST_BUNDLE_VERSION);
 		return isUpdateReady && latestBundleVersion != null && latestBundleVersion == currentBundleVersion;
 	}
 
@@ -59,8 +59,8 @@ public class BundleUpdateManager implements Task {
 	 * @param context task context by request.
 	 * @return true if need, otherwise false.
 	 */
-	public static boolean isBundleDownloadRequired(TaskContext context) {
-		String updateType = (String) context.getContextProperties().get(TaskContext.Key.UPDATE_TYPE);
+	public static boolean isBundleDownloadRequired(RequestContext context) {
+		String updateType = (String) context.getContextProperties().get(RequestContext.Key.UPDATE_TYPE);
 		if ("dev_update".equalsIgnoreCase(updateType)) {
 			return true;
 		}

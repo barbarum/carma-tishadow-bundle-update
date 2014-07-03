@@ -3,10 +3,12 @@
  */
 package ma.car.tishadow.bundle.update.tasks;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import ma.car.tishadow.bundle.update.ApplicationState;
+import ma.car.tishadow.bundle.update.util.TiAppUtil;
 
 import org.appcelerator.kroll.KrollObject;
 import org.appcelerator.titanium.TiApplication;
@@ -15,9 +17,10 @@ import org.appcelerator.titanium.TiProperties;
 import android.content.Context;
 
 /**
+ * The bundle update request's context.
  * @author wei.ding
  */
-public class TaskContext {
+public class RequestContext {
 
 	private AtomicReference<ApplicationState> stateRef = new AtomicReference<ApplicationState>(ApplicationState.UNKNOWN);
 
@@ -31,7 +34,20 @@ public class TaskContext {
 
 	private HashMap<String, Object> contextProperties;
 
-	public TaskContext(Context context) {
+	private File backupDirectory;
+
+	private File patchDirectory;
+
+	private File applicationResourcesDirectory;
+
+	private File applicationDataDirectory;
+
+	/**
+	 * Filename of manifest file.
+	 */
+	public static final String MANIFEST_FILENAME = "manifest.mf";
+
+	public RequestContext(Context context) {
 		this(new TiProperties(context, TiApplication.APPLICATION_PREFERENCES_NAME, false));
 		this.setApplicationContext(context);
 	}
@@ -39,7 +55,7 @@ public class TaskContext {
 	/**
 	 * @param properties
 	 */
-	public TaskContext(TiProperties properties) {
+	public RequestContext(TiProperties properties) {
 		super();
 		this.applicationProperties = properties;
 	}
@@ -117,6 +133,66 @@ public class TaskContext {
 		return this.processRef.get();
 	}
 
+	/**
+	 * Gets backup directory, also called 'standby' directory, which is used to backup current application resources, and will be updated later whenever the
+	 * bundle is ready to apply. This backup directory on android looks like: "/mnt/sdcard/Android/data/[appID]/files/[standby_dir]"
+	 * @return {@link File} point to backup directory on external storage.
+	 */
+	public File getBackupDirectory() {
+		if (this.backupDirectory == null) {
+			String backupProp = (String) this.getContextProperties().get(RequestContext.Key.BACKUP_DIRECTORY);
+			this.backupDirectory = new File(this.getApplicationContext().getExternalFilesDir(null), backupProp);
+		}
+		return this.backupDirectory;
+	}
+
+	/**
+	 * Gets patch directory, also called 'bundle-decompress' directory, which is used to extract new bundle resources, and will be updated to backup directory.
+	 * This directory on android looks like: "/mnt/sdcard/Android/data/[appID]/files/[bundle_decompress_dir]"
+	 * @return
+	 */
+	public File getPatchDirectory() {
+		if (this.patchDirectory == null) {
+			String directorySeting = (String) this.getContextProperties().get(RequestContext.Key.BUNDLE_DECOMPRESS_DIRECTORY);
+			this.patchDirectory = new File(this.getApplicationContext().getExternalFilesDir(null), directorySeting);
+		}
+		return this.patchDirectory;
+	}
+
+	/**
+	 * Gets application resources directory, where you can find all javascript resources to execute in current application. This directory on android looks
+	 * like: "/data/data/[appID]/appData/[app_name]/"
+	 * @return
+	 */
+	public File getApplicationResourcesDirectory() {
+		if (this.applicationResourcesDirectory == null) {
+			String directorySeting = (String) this.getContextProperties().get(RequestContext.Key.APP_NAME);
+			this.applicationResourcesDirectory = new File(this.applicationDataDirectory, directorySeting);
+		}
+		return this.applicationResourcesDirectory;
+	}
+
+	/**
+	 * Gets current application's internal root data directory, where you can find all resources(javascript, caches, databases, and etc.). This directory on
+	 * android looks like: "/data/data/[appID]/appData/"
+	 * @return
+	 */
+	public File getApplicationDataDirectory() {
+		if (this.applicationDataDirectory == null) {
+			this.applicationDataDirectory = this.getApplicationContext().getDir(TiAppUtil.APPLICATION_DATA_DIRECTORY_KEY, Context.MODE_PRIVATE);
+		}
+		return this.applicationDataDirectory;
+	}
+
+	/**
+	 * Gets specific bundle's manifest by the specific directory.
+	 * @param directory
+	 * @return
+	 */
+	public File getBundleManifest(File directory) {
+		return new File(directory, RequestContext.MANIFEST_FILENAME);
+	}
+
 	public static class Key {
 
 		/**
@@ -149,12 +225,6 @@ public class TaskContext {
 		 * The key to a remote URL to download the latest bundle
 		 */
 		public static final String BUNDLE_DOWNLOAD_URL = "bundle_download_url";
-
-		// Application's persistent properties keys
-		/**
-		 * The key to get the version number of the bundle which is working now.
-		 */
-		public static final String CURRENT_BUNDLE_VERSION = "current_bundle_version";
 
 		// Internal Generated keys
 		/**

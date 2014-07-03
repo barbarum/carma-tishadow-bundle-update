@@ -32,7 +32,7 @@ public class SeriesTask extends LinkedList<Task> implements Task {
 	 * @see ma.car.tishadow.bundle.update.tasks.Task#execute()
 	 */
 	@Override
-	public boolean execute(TaskContext context) {
+	public boolean execute(RequestContext context) {
 
 		return false;
 	}
