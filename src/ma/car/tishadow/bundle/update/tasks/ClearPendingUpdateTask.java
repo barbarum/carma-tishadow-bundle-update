@@ -8,7 +8,6 @@ import java.io.IOException;
 
 import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.util.TiAppUtil;
-import ma.car.tishadow.bundle.update.util.TiAppUtil.PropertyKey;
 
 import org.apache.commons.io.FileUtils;
 import org.appcelerator.kroll.common.Log;
@@ -31,8 +30,6 @@ public class ClearPendingUpdateTask implements Task {
 	public boolean execute(RequestProxy context) {
 
 		Context applicationContext = context.getApplicationContext();
-
-		context.getApplicationProperties().setBool(PropertyKey.UPDATE_READY_KEY, false);
 
 		File appDataDirectory = applicationContext.getDir(TiAppUtil.APPLICATION_DATA_DIRECTORY_KEY, Context.MODE_PRIVATE);
 		File backupDirectory = new File(appDataDirectory, context.getApplicationProperties().getString(RequestProxy.Key.BACKUP_DIRECTORY, RequestProxy.Key.BACKUP_DIRECTORY));

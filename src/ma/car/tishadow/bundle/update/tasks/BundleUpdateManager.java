@@ -67,12 +67,9 @@ public class BundleUpdateManager implements Task, OnBundleUpdateStateChangedList
 	 */
 	public static boolean isLatestBundleApplied(RequestProxy context) {
 		TiProperties applicationProperties = context.getApplicationProperties();
-		HashMap<String, ?> contextProperties = context.getRequestProperties();
-
-		boolean isUpdateReady = applicationProperties.getBool(PropertyKey.UPDATE_READY_KEY, false);
 		long currentBundleVersion = applicationProperties.getInt(PropertyKey.CURRENT_BUNDLE_VERSION, -1);
-		Long latestBundleVersion = (Long) contextProperties.get(RequestProxy.Key.LATEST_BUNDLE_VERSION);
-		return isUpdateReady && latestBundleVersion != null && latestBundleVersion == currentBundleVersion;
+		Long latestBundleVersion = (Long) context.getRequestProperty(RequestProxy.Key.LATEST_BUNDLE_VERSION);
+		return latestBundleVersion != null && latestBundleVersion == currentBundleVersion;
 	}
 
 	/**

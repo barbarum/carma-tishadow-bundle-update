@@ -12,6 +12,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import ma.car.tishadow.bundle.update.tasks.BundleUpdateManager;
 import ma.car.tishadow.bundle.update.util.TiAppUtil;
 
+import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.kroll.common.Log;
@@ -72,4 +73,15 @@ public class TishadowBundleUpdateModule extends KrollModule {
 		new BundleUpdateManager().execute(context);
 	}
 
+	/**
+	 * Create request proxy.
+	 * @param dict
+	 * @return
+	 */
+	@Kroll.method
+	public RequestProxy createRequest(KrollDict dict) {
+		RequestProxy request = new RequestProxy(this.getActivity());
+		request.setJavascriptContext(getKrollObject());
+		return request;
+	}
 }

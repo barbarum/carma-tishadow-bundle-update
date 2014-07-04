@@ -31,7 +31,7 @@ public class TiAppUtil {
 		/**
 		 * The key to get the version number of the bundle which is working now.
 		 */
-		public static final String CURRENT_BUNDLE_VERSION = "current_bundle_version";
+		public static final String CURRENT_BUNDLE_VERSION = "bundleVersion";
 
 		/**
 		 * Update Ready Key
