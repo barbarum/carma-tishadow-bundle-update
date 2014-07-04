@@ -6,6 +6,8 @@ package ma.car.tishadow.bundle.update.tasks;
 import java.io.File;
 import java.io.IOException;
 
+import ma.car.tishadow.bundle.update.RequestProxy;
+
 import org.apache.commons.io.FileUtils;
 
 import android.util.Log;
@@ -24,7 +26,7 @@ public class BackupAppTask implements Task {
 	 * @see ma.car.tishadow.bundle.update.tasks.Task#execute(ma.car.tishadow.bundle.update.tasks.TaskContext)
 	 */
 	@Override
-	public boolean execute(RequestContext context) {
+	public boolean execute(RequestProxy context) {
 
 		File backupDirectory = context.getBackupDirectory();
 		File sourceDirectory = context.getApplicationResourcesDirectory();

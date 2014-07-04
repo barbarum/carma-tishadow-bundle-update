@@ -3,6 +3,8 @@
  */
 package ma.car.tishadow.bundle.update.tasks;
 
+import ma.car.tishadow.bundle.update.RequestProxy;
+
 /**
  * Represents a single task, which can be one of the following 3 tasks:
  * <ul>
@@ -17,5 +19,5 @@ public interface Task {
 	/**
 	 * Executes current task.
 	 */
-	public boolean execute(RequestContext context);
+	public boolean execute(RequestProxy context);
 }

@@ -6,6 +6,7 @@ package ma.car.tishadow.bundle.update.tasks;
 import java.io.File;
 import java.io.IOException;
 
+import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.util.ManifestUtil;
 
 import org.apache.commons.io.FileUtils;
@@ -25,7 +26,10 @@ public class ApplyPatchTask implements Task {
 	 * @see ma.car.tishadow.bundle.update.tasks.Task#execute(ma.car.tishadow.bundle.update.tasks.TaskContext)
 	 */
 	@Override
-	public boolean execute(RequestContext context) {
+	public boolean execute(RequestProxy context) {
+
+		context.markedBundleUpdateStateTo(BundleUpdateState.APPLYING);
+
 		ManifestUtil.Patch patch;
 		try {
 			File patchDirectory = context.getPatchDirectory();
@@ -55,11 +59,11 @@ public class ApplyPatchTask implements Task {
 			}
 			FileUtils.copyFile(newManifest, oldManifest, false);
 			FileUtils.deleteDirectory(context.getPatchDirectory());
-			
-			
+
 			Log.i(TAG, "Apply Patch done.");
 			return true;
 		} catch (IOException e) {
+			context.markedBundleUpdateStateTo(BundleUpdateState.INTERRUPTED);
 			Log.e(TAG, "Failed to apply patch!", e);
 		}
 		return false;

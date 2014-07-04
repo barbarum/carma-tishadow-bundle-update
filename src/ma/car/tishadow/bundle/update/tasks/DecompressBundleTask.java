@@ -6,6 +6,7 @@ package ma.car.tishadow.bundle.update.tasks;
 import java.io.File;
 import java.io.IOException;
 
+import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.util.ZipUtil;
 
 import org.apache.commons.io.FileUtils;
@@ -26,10 +27,17 @@ public class DecompressBundleTask implements Task {
 	 * @see ma.car.tishadow.bundle.update.tasks.Task#execute(ma.car.tishadow.bundle.update.tasks.TaskContext)
 	 */
 	@Override
-	public boolean execute(RequestContext context) {
+	public boolean execute(RequestProxy context) {
+		Log.i(TAG, "Start DecompressBundleTask...");
+		Boolean result = doExecute(context);
+		context.markedBundleUpdateStateTo(result ? BundleUpdateState.DECOMPRESSED : BundleUpdateState.INTERRUPTED);
+		return result;
+	}
+
+	private boolean doExecute(RequestProxy context) {
 		Context applicationContext = context.getApplicationContext();
-		String bundleDecompressDirectory = (String) context.getContextProperties().get(RequestContext.Key.BUNDLE_DECOMPRESS_DIRECTORY);
-		String filename = (String) context.getContextProperties().get(RequestContext.Key.DOWNLOAD_DESTINATION_FILENAME);
+		String bundleDecompressDirectory = (String) context.getRequestProperties().get(RequestProxy.Key.BUNDLE_DECOMPRESS_DIRECTORY);
+		String filename = (String) context.getRequestProperties().get(RequestProxy.Key.DOWNLOAD_DESTINATION_FILENAME);
 
 		File compressionFile = new File(applicationContext.getExternalFilesDir(null), filename);
 		File decompressDirectory = new File(applicationContext.getExternalFilesDir(null), bundleDecompressDirectory);

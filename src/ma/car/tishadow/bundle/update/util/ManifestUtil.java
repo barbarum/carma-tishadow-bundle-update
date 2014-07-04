@@ -49,6 +49,11 @@ public final class ManifestUtil {
 		}
 	}
 
+	/**
+	 * Filename of manifest file.
+	 */
+	public static final String MANIFEST_FILENAME = "manifest.mf";
+
 	private static final String COLUMN_SYM = ",";
 	private static final String COMMENT_SYM = "#";
 	private static final String BUNDLE_VERSION_REGEXP = "[^\\d]";

@@ -3,12 +3,13 @@
  */
 package ma.car.tishadow.bundle.update.tasks;
 
-public enum BundleUpdateProcess {
+public enum BundleUpdateState {
 	CHECKED,
 	DOWNLOADED,
 	DECOMPRESSED,
 	READY_FOR_APPLY,
 	APPLYED,
+	INTERRUPTED,
 
 	STARTING,
 	DOWNLOADING,

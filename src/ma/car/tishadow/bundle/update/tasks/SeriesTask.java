@@ -5,6 +5,7 @@ package ma.car.tishadow.bundle.update.tasks;
 
 import java.util.LinkedList;
 
+import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.TishadowBundleUpdateModule;
 
 /**
@@ -32,9 +33,13 @@ public class SeriesTask extends LinkedList<Task> implements Task {
 	 * @see ma.car.tishadow.bundle.update.tasks.Task#execute()
 	 */
 	@Override
-	public boolean execute(RequestContext context) {
-
-		return false;
+	public boolean execute(RequestProxy context) {
+		for (Task task : this) {
+			if (!task.execute(context)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public SeriesTask addToQueue(Task task) {

@@ -1,17 +1,23 @@
 /**
  * 
  */
-package ma.car.tishadow.bundle.update.tasks;
+package ma.car.tishadow.bundle.update;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import ma.car.tishadow.bundle.update.ApplicationState;
+import ma.car.tishadow.bundle.update.tasks.BundleUpdateState;
+import ma.car.tishadow.bundle.update.util.ManifestUtil;
 import ma.car.tishadow.bundle.update.util.TiAppUtil;
 
+import org.appcelerator.kroll.KrollDict;
+import org.appcelerator.kroll.KrollFunction;
 import org.appcelerator.kroll.KrollObject;
+import org.appcelerator.kroll.KrollProxy;
+import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.titanium.TiApplication;
+import org.appcelerator.titanium.TiContext;
 import org.appcelerator.titanium.TiProperties;
 
 import android.content.Context;
@@ -20,11 +26,12 @@ import android.content.Context;
  * The bundle update request's context.
  * @author wei.ding
  */
-public class RequestContext {
+@Kroll.proxy(creatableInModule = TishadowBundleUpdateModule.class)
+public class RequestProxy extends KrollProxy {
 
 	private AtomicReference<ApplicationState> stateRef = new AtomicReference<ApplicationState>(ApplicationState.UNKNOWN);
 
-	private AtomicReference<BundleUpdateProcess> processRef = new AtomicReference<BundleUpdateProcess>(BundleUpdateProcess.STARTING);
+	private AtomicReference<BundleUpdateState> updateStateRef = new AtomicReference<BundleUpdateState>(BundleUpdateState.STARTING);
 
 	private KrollObject javascriptContext;
 
@@ -32,7 +39,7 @@ public class RequestContext {
 
 	private final TiProperties applicationProperties;
 
-	private HashMap<String, Object> contextProperties;
+	private HashMap<String, Object> properties;
 
 	private File backupDirectory;
 
@@ -42,12 +49,13 @@ public class RequestContext {
 
 	private File applicationDataDirectory;
 
-	/**
-	 * Filename of manifest file.
-	 */
-	public static final String MANIFEST_FILENAME = "manifest.mf";
+	private OnBundleUpdateStateChangedListener onBundleUpdateStateChangedListener;
 
-	public RequestContext(Context context) {
+	public RequestProxy(TiContext tiContext) {
+		this(tiContext.getActivity());
+	}
+
+	public RequestProxy(Context context) {
 		this(new TiProperties(context, TiApplication.APPLICATION_PREFERENCES_NAME, false));
 		this.setApplicationContext(context);
 	}
@@ -55,9 +63,19 @@ public class RequestContext {
 	/**
 	 * @param properties
 	 */
-	public RequestContext(TiProperties properties) {
+	public RequestProxy(TiProperties properties) {
 		super();
 		this.applicationProperties = properties;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.appcelerator.kroll.KrollProxy#handleCreationDict(org.appcelerator.kroll.KrollDict)
+	 */
+	@Override
+	public void handleCreationDict(KrollDict dict) {
+		super.handleCreationDict(dict);
+		this.setRequestProperties(dict);
 	}
 
 	/**
@@ -106,31 +124,63 @@ public class RequestContext {
 	/**
 	 * @return the contextProperties
 	 */
-	public HashMap<String, Object> getContextProperties() {
-		return contextProperties;
+	public HashMap<String, Object> getRequestProperties() {
+		return properties;
 	}
 
 	/**
-	 * @param contextProperties the contextProperties to set
+	 * Gets context property by key.
+	 * @param key
+	 * @return
 	 */
-	public void setContextProperties(HashMap<String, Object> contextProperties) {
-		this.contextProperties = contextProperties;
+	public Object getRequestProperty(String key) {
+		return properties.get(key);
 	}
 
 	/**
-	 * Marks current bundle update process to currentProcess.
-	 * @param currentProcess current process.
+	 * Gets context callback by specific key.
+	 * @param key
+	 * @return
 	 */
-	public void markedBundleUpdateProcessTo(BundleUpdateProcess currentProcess) {
-		this.processRef.set(currentProcess);
+	public KrollFunction getRequestCallback(String key) {
+		Object function = this.properties.get(key);
+		return function == null || !(function instanceof KrollFunction) ? null : (KrollFunction) function;
+	}
+
+	/**
+	 * @param properties the contextProperties to set
+	 */
+	public void setRequestProperties(HashMap<String, Object> properties) {
+		this.properties = properties;
+	}
+
+	/**
+	 * Marks current bundle update process to currentState.
+	 * @param currentState current state.
+	 */
+	public void markedBundleUpdateStateTo(BundleUpdateState currentState) {
+		BundleUpdateState previousState = this.updateStateRef.getAndSet(currentState);
+		if (this.onBundleUpdateStateChangedListener != null) {
+			this.onBundleUpdateStateChangedListener.onBundleUpdateStateChanged(previousState, currentState, this);
+		}
 	}
 
 	/**
 	 * Gets current bundle update process.
 	 * @return
 	 */
-	public BundleUpdateProcess getCurrentBundleUpdateProcess() {
-		return this.processRef.get();
+	public BundleUpdateState getCurrentBundleUpdateProcess() {
+		return this.updateStateRef.get();
+	}
+
+	/**
+	 * Gets current bundle update process.
+	 * @return
+	 */
+	@Kroll.getProperty
+	@Kroll.method
+	public String getUpdateState() {
+		return this.getCurrentBundleUpdateProcess().toString();
 	}
 
 	/**
@@ -140,7 +190,7 @@ public class RequestContext {
 	 */
 	public File getBackupDirectory() {
 		if (this.backupDirectory == null) {
-			String backupProp = (String) this.getContextProperties().get(RequestContext.Key.BACKUP_DIRECTORY);
+			String backupProp = (String) this.getRequestProperties().get(RequestProxy.Key.BACKUP_DIRECTORY);
 			this.backupDirectory = new File(this.getApplicationContext().getExternalFilesDir(null), backupProp);
 		}
 		return this.backupDirectory;
@@ -153,7 +203,7 @@ public class RequestContext {
 	 */
 	public File getPatchDirectory() {
 		if (this.patchDirectory == null) {
-			String directorySeting = (String) this.getContextProperties().get(RequestContext.Key.BUNDLE_DECOMPRESS_DIRECTORY);
+			String directorySeting = (String) this.getRequestProperties().get(RequestProxy.Key.BUNDLE_DECOMPRESS_DIRECTORY);
 			this.patchDirectory = new File(this.getApplicationContext().getExternalFilesDir(null), directorySeting);
 		}
 		return this.patchDirectory;
@@ -166,7 +216,7 @@ public class RequestContext {
 	 */
 	public File getApplicationResourcesDirectory() {
 		if (this.applicationResourcesDirectory == null) {
-			String directorySeting = (String) this.getContextProperties().get(RequestContext.Key.APP_NAME);
+			String directorySeting = (String) this.getRequestProperties().get(RequestProxy.Key.APP_NAME);
 			this.applicationResourcesDirectory = new File(this.applicationDataDirectory, directorySeting);
 		}
 		return this.applicationResourcesDirectory;
@@ -190,7 +240,21 @@ public class RequestContext {
 	 * @return
 	 */
 	public File getBundleManifest(File directory) {
-		return new File(directory, RequestContext.MANIFEST_FILENAME);
+		return new File(directory, ManifestUtil.MANIFEST_FILENAME);
+	}
+
+	/**
+	 * @return the onBundleUpdateStateChangedListener
+	 */
+	public OnBundleUpdateStateChangedListener getOnBundleUpdateStateChangedListener() {
+		return onBundleUpdateStateChangedListener;
+	}
+
+	/**
+	 * @param onBundleUpdateStateChangedListener the onBundleUpdateStateChangedListener to set
+	 */
+	public void setOnBundleUpdateStateChangedListener(OnBundleUpdateStateChangedListener onBundleUpdateStateChangedListener) {
+		this.onBundleUpdateStateChangedListener = onBundleUpdateStateChangedListener;
 	}
 
 	public static class Key {
@@ -225,6 +289,41 @@ public class RequestContext {
 		 * The key to a remote URL to download the latest bundle
 		 */
 		public static final String BUNDLE_DOWNLOAD_URL = "bundle_download_url";
+
+		/**
+		 * The key to start downloading bundle callback.
+		 */
+		public static final String ON_BUNDLE_DOWNLOADING_CALLBACK = "onBundleDownloading";
+
+		/**
+		 * The key to the callback KrollFunction, where javascript side can handle their own logic(change bundle update progressing bar UI e.g).
+		 */
+		public static final String ON_BUNDLE_DOWNLOAD_CALLBACK = "onBundleDownload";
+
+		/**
+		 * The key to the callback KrollFunction when the download bundle has been extracted.
+		 */
+		public static final String ON_BUNDLE_EXTRACTED_CALLBACK = "onBundleExtracted";
+
+		/**
+		 * The key to the callback KrollFunction when the bundle is ready for apply.
+		 */
+		public static final String ON_BUNDLE_READY_FOR_APPLY_CALLBACK = "onBundleReadyForApply";
+
+		/**
+		 * The key to the callback KrollFunction when the extracted bundle is applying to backup/standby directory.
+		 */
+		public static final String ON_BUNDLE_APPLYING_CALLBACK = "onBundleApplying";
+
+		/**
+		 * The key to the callback krollFunction when the bundle has been applied completely.
+		 */
+		public static final String ON_BUNDLE_APPLIED_CALLBACK = "onBundleApplied";
+
+		/**
+		 * The key to the callback KrollFunction whenever the bundle process has been changed.
+		 */
+		public static final String ON_STATE_CHANGED_CALLBACK = "onStateChanged";
 
 		// Internal Generated keys
 		/**

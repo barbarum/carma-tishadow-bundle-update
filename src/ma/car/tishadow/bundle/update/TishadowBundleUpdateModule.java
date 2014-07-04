@@ -7,8 +7,10 @@
  */
 package ma.car.tishadow.bundle.update;
 
+import java.util.concurrent.LinkedBlockingQueue;
+
 import ma.car.tishadow.bundle.update.tasks.BundleUpdateManager;
-import ma.car.tishadow.bundle.update.tasks.RequestContext;
+import ma.car.tishadow.bundle.update.util.TiAppUtil;
 
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
@@ -22,8 +24,11 @@ public class TishadowBundleUpdateModule extends KrollModule {
 
 	public static final long BACKWARD_COMPATIBLE_UID = 1L;
 
+	private LinkedBlockingQueue<RequestProxy> queue;
+
 	public TishadowBundleUpdateModule() {
 		super();
+		queue = new LinkedBlockingQueue<RequestProxy>();
 	}
 
 	@Kroll.onAppCreate
@@ -35,22 +40,36 @@ public class TishadowBundleUpdateModule extends KrollModule {
 	}
 
 	// Public methods
-	public void sendBundleUpdateRequest() {
+	@Kroll.method
+	public void send(final RequestProxy request) {
+		request.setJavascriptContext(getKrollObject());
+		queue.add(request);
+		handleRequest();
+	}
 
+	private void handleRequest() {
+		final RequestProxy request = queue.poll();
+		if (request == null) {
+			return;
+		}
+		TiAppUtil.THREAD_POOL.execute(new Runnable() {
+
+			@Override
+			public void run() {
+				new BundleUpdateManager().execute(request);
+				handleRequest();
+			}
+
+		});
 	}
 
 	@Kroll.method
 	public void doBundleUpdate() {
 
-		RequestContext context = new RequestContext(getActivity());
+		RequestProxy context = new RequestProxy(getActivity());
 		context.setJavascriptContext(getKrollObject());
 
 		new BundleUpdateManager().execute(context);
-	}
-
-	@Kroll.method
-	public String getBundleUpdateState() {
-		return null;
 	}
 
 }

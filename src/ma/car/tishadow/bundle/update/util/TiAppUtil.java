@@ -3,10 +3,19 @@
  */
 package ma.car.tishadow.bundle.update.util;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
+ * The utility for current application.
  * @author wei.ding
  */
 public class TiAppUtil {
+
+	/**
+	 * Cached thread pool.
+	 */
+	public static ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
 
 	/**
 	 * Application data directory key.
@@ -33,6 +42,11 @@ public class TiAppUtil {
 		 * Updated Version's key
 		 */
 		public static final String UPDATE_VERSION_KEY = "updateVersion";
+
+		/**
+		 * Installed revision's key.
+		 */
+		public static final String CURRENT_INSTALLED_REVISION = "installed.revision";
 
 	}
 

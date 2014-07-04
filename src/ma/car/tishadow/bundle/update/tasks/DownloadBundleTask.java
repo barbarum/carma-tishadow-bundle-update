@@ -8,6 +8,8 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import ma.car.tishadow.bundle.update.RequestProxy;
+
 import org.appcelerator.kroll.common.Log;
 
 import android.app.DownloadManager;
@@ -35,16 +37,22 @@ public class DownloadBundleTask implements Task {
 	 * @see ma.car.tishadow.bundle.update.tasks.Task#execute(ma.car.tishadow.bundle.update.tasks.TaskContext)
 	 */
 	@Override
-	public boolean execute(RequestContext context) {
+	public boolean execute(RequestProxy context) {
+		Log.d(TAG, "Starting DownloadBundleTask...");
 		if (!BundleUpdateManager.isBundleDownloadRequired(context)) {
+			Log.d(TAG, "Don't need to download bundle, because already up-to-date.");
 			return true;
 		}
 		lock.lock();
 		try {
+			Log.i(TAG, "starting to downloading bundle...");
 			sendBundleDownloadRequest(context);
 			waitForDownloadComplete.await();
+			context.markedBundleUpdateStateTo(BundleUpdateState.DOWNLOADED);
+			Log.i(TAG, "DownloadBundleTask done.");
 			return true;
 		} catch (InterruptedException e) {
+			context.markedBundleUpdateStateTo(BundleUpdateState.INTERRUPTED);
 			Log.e(TAG, "Failed to handle post tasks if the bundle would be download later because of bundle update thread is interrupted.", e);
 		} finally {
 			lock.unlock();
@@ -53,7 +61,7 @@ public class DownloadBundleTask implements Task {
 		return false;
 	}
 
-	private void sendBundleDownloadRequest(RequestContext context) {
+	private void sendBundleDownloadRequest(RequestProxy context) {
 
 		// Register ACTION_DOWNLOAD_COMPLETE event, and send download request to Android DownloadManager service.
 		Context applicationContext = context.getApplicationContext();
@@ -61,9 +69,9 @@ public class DownloadBundleTask implements Task {
 		applicationContext.registerReceiver(newDownloadCompleteHandler(context), new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 		DownloadManager downloadManager = (DownloadManager) applicationContext.getSystemService(Context.DOWNLOAD_SERVICE);
 
-		String bundleDownloadUrl = (String) context.getContextProperties().get(RequestContext.Key.BUNDLE_DOWNLOAD_URL);
-		String latestBundleVersion = (String) context.getContextProperties().get(RequestContext.Key.LATEST_BUNDLE_VERSION);
-		String bundleDecompressDirectory = (String) context.getContextProperties().get(RequestContext.Key.BUNDLE_DECOMPRESS_DIRECTORY);
+		String bundleDownloadUrl = (String) context.getRequestProperties().get(RequestProxy.Key.BUNDLE_DOWNLOAD_URL);
+		String latestBundleVersion = (String) context.getRequestProperties().get(RequestProxy.Key.LATEST_BUNDLE_VERSION);
+		String bundleDecompressDirectory = (String) context.getRequestProperties().get(RequestProxy.Key.BUNDLE_DECOMPRESS_DIRECTORY);
 		String bundleLocalFileName = bundleDecompressDirectory + ".zip";
 		File destination = new File(applicationContext.getExternalFilesDir(null), bundleLocalFileName);
 
@@ -72,9 +80,9 @@ public class DownloadBundleTask implements Task {
 		request.setDestinationUri(Uri.fromFile(destination));
 		long downloadId = downloadManager.enqueue(request);
 
-		context.getContextProperties().put(RequestContext.Key.DOWNLOADING_BUNDLE_REFID, new Long(downloadId));
-		context.getContextProperties().put(RequestContext.Key.DOWNLOAD_DESTINATION_FILENAME, bundleLocalFileName);
-		context.markedBundleUpdateProcessTo(BundleUpdateProcess.DOWNLOADING);
+		context.getRequestProperties().put(RequestProxy.Key.DOWNLOADING_BUNDLE_REFID, new Long(downloadId));
+		context.getRequestProperties().put(RequestProxy.Key.DOWNLOAD_DESTINATION_FILENAME, bundleLocalFileName);
+		context.markedBundleUpdateStateTo(BundleUpdateState.DOWNLOADING);
 
 		Log.i(TAG, "Downloading bundle '" + latestBundleVersion + "' from '" + bundleDownloadUrl + "' into directory '" + destination + "'... ");
 	}
@@ -84,7 +92,7 @@ public class DownloadBundleTask implements Task {
 	 * @param context
 	 * @return
 	 */
-	private BroadcastReceiver newDownloadCompleteHandler(final RequestContext context) {
+	private BroadcastReceiver newDownloadCompleteHandler(final RequestProxy context) {
 		return new BroadcastReceiver() {
 
 			// TODO The android default DownloadManager may not be stable because of an open bug <a
@@ -94,7 +102,7 @@ public class DownloadBundleTask implements Task {
 				lock.lock();
 				try {
 					long referenceId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L);
-					long storedReferenceId = (Long) context.getContextProperties().get(RequestContext.Key.DOWNLOADING_BUNDLE_REFID);
+					long storedReferenceId = (Long) context.getRequestProperties().get(RequestProxy.Key.DOWNLOADING_BUNDLE_REFID);
 					if (referenceId != -1 && referenceId == storedReferenceId) {
 						onBundleDownloadCompleted(context, intent);
 						waitForDownloadComplete.signal();
@@ -107,7 +115,7 @@ public class DownloadBundleTask implements Task {
 		};
 	}
 
-	private void onBundleDownloadCompleted(RequestContext context, Intent intent) {
+	private void onBundleDownloadCompleted(RequestProxy context, Intent intent) {
 		long referenceId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
 
 		Query query = new Query();
@@ -127,8 +135,6 @@ public class DownloadBundleTask implements Task {
 		}
 
 		cursor.close();
-
-		context.markedBundleUpdateProcessTo(BundleUpdateProcess.DOWNLOADED);
 	}
 
 }
