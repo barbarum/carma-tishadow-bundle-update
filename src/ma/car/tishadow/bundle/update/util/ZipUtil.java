@@ -86,11 +86,12 @@ public final class ZipUtil {
 	/**
 	 * Compress a list of files into a simple zip file asynchronized.
 	 */
+	@SuppressWarnings("rawtypes")
 	public static void compressAsyn(final HashMap arguments, final KrollFunction callback, final KrollObject context) {
 
 		POOL.execute(new Runnable() {
 
-			@SuppressWarnings({ "rawtypes", "unchecked" })
+			@SuppressWarnings({ "unchecked" })
 			@Override
 			public void run() {
 
@@ -166,10 +167,11 @@ public final class ZipUtil {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static void decompressAsyn(final HashMap arguments, final KrollFunction callback, final KrollObject context) {
 		POOL.execute(new Runnable() {
 
-			@SuppressWarnings({ "rawtypes", "unchecked" })
+			@SuppressWarnings({ "unchecked" })
 			@Override
 			public void run() {
 
@@ -212,6 +214,7 @@ public final class ZipUtil {
 		return decompress(dest, src, overwrite);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static void unzipAsyn(HashMap arguments, KrollFunction callback, KrollObject context) {
 		decompressAsyn(arguments, callback, context);
 	}
@@ -233,6 +236,7 @@ public final class ZipUtil {
 		return compress(dest, src);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static void zipAsyn(HashMap arguments, KrollFunction callback, KrollObject context) {
 		compressAsyn(arguments, callback, context);
 	}

@@ -29,6 +29,8 @@ import android.content.Context;
 @Kroll.proxy(creatableInModule = TishadowBundleUpdateModule.class)
 public class RequestProxy extends KrollProxy {
 
+	private static final String TEMPORARY_DIRECTORY_NAME = "tmp";
+
 	private AtomicReference<ApplicationState> stateRef = new AtomicReference<ApplicationState>(ApplicationState.UNKNOWN);
 
 	private AtomicReference<BundleUpdateState> updateStateRef = new AtomicReference<BundleUpdateState>(BundleUpdateState.STARTING);
@@ -37,7 +39,7 @@ public class RequestProxy extends KrollProxy {
 
 	private Context applicationContext;
 
-	private final TiProperties applicationProperties;
+	private TiProperties applicationProperties;
 
 	private HashMap<String, Object> properties;
 
@@ -48,6 +50,12 @@ public class RequestProxy extends KrollProxy {
 	private File applicationResourcesDirectory;
 
 	private File applicationDataDirectory;
+
+	private File externalApplicationBaseDirectory;
+
+	private File externalApplicationTemporaryDirectory;
+
+	private File deprecatedPathDirectory;
 
 	private OnBundleUpdateStateChangedListener onBundleUpdateStateChangedListener;
 
@@ -185,26 +193,63 @@ public class RequestProxy extends KrollProxy {
 
 	/**
 	 * Gets backup directory, also called 'standby' directory, which is used to backup current application resources, and will be updated later whenever the
-	 * bundle is ready to apply. This backup directory on android looks like: "/mnt/sdcard/Android/data/[appID]/files/[standby_dir]"
+	 * bundle is ready to apply. This backup directory on android looks like: "/mnt/sdcard/Android/data/[appID]/tmp/[standby_dir]"
 	 * @return {@link File} point to backup directory on external storage.
 	 */
 	public File getBackupDirectory() {
 		if (this.backupDirectory == null) {
-			String backupProp = (String) this.getRequestProperties().get(RequestProxy.Key.BACKUP_DIRECTORY);
-			this.backupDirectory = new File(this.getApplicationContext().getExternalFilesDir(null), backupProp);
+			String backupProp = (String) this.getRequestProperty(RequestProxy.Key.BACKUP_DIRECTORY);
+			this.backupDirectory = new File(getExternalApplicationTemporaryDirectory(), backupProp);
 		}
 		return this.backupDirectory;
 	}
 
 	/**
+	 * Gets deprecated patch directory, which is used to bundle update by tishadow in old way.
+	 * @return
+	 */
+	public File getDeprecatedPatchDirectory() {
+		if (this.deprecatedPathDirectory == null) {
+			String backupDirectoryName = (String) this.getRequestProperty(RequestProxy.Key.BACKUP_DIRECTORY);
+			this.deprecatedPathDirectory = new File(this.getApplicationDataDirectory(), backupDirectoryName);
+		}
+		return this.deprecatedPathDirectory;
+	}
+
+	private File getExternalApplicationBaseDirectory() {
+		if (this.externalApplicationBaseDirectory == null) {
+			File externalCacheDirectory = this.getApplicationContext().getExternalCacheDir();
+			this.externalApplicationBaseDirectory = externalCacheDirectory.getParentFile();
+		}
+		return this.externalApplicationBaseDirectory;
+	}
+
+	/**
+	 * Gets current application's external temporary directory, which is used to temporary caches, or hard drive manipulation(e.g bundle update).
+	 * @return
+	 */
+	public File getExternalApplicationTemporaryDirectory() {
+		if (this.externalApplicationTemporaryDirectory == null) {
+			File baseDir = this.getExternalApplicationBaseDirectory();
+			if (baseDir == null) {
+				return null;
+			}
+			File tempDir = new File(baseDir, TEMPORARY_DIRECTORY_NAME);
+			tempDir.mkdirs();
+			this.externalApplicationTemporaryDirectory = tempDir.exists() ? tempDir : null;
+		}
+		return this.externalApplicationTemporaryDirectory;
+	}
+
+	/**
 	 * Gets patch directory, also called 'bundle-decompress' directory, which is used to extract new bundle resources, and will be updated to backup directory.
-	 * This directory on android looks like: "/mnt/sdcard/Android/data/[appID]/files/[bundle_decompress_dir]"
+	 * This directory on android looks like: "/mnt/sdcard/Android/data/[appID]/tmp/[bundle_decompress_dir]"
 	 * @return
 	 */
 	public File getPatchDirectory() {
 		if (this.patchDirectory == null) {
 			String directorySeting = (String) this.getRequestProperties().get(RequestProxy.Key.BUNDLE_DECOMPRESS_DIRECTORY);
-			this.patchDirectory = new File(this.getApplicationContext().getExternalFilesDir(null), directorySeting);
+			this.patchDirectory = new File(getExternalApplicationTemporaryDirectory(), directorySeting);
 		}
 		return this.patchDirectory;
 	}
@@ -217,7 +262,7 @@ public class RequestProxy extends KrollProxy {
 	public File getApplicationResourcesDirectory() {
 		if (this.applicationResourcesDirectory == null) {
 			String directorySeting = (String) this.getRequestProperties().get(RequestProxy.Key.APP_NAME);
-			this.applicationResourcesDirectory = new File(this.applicationDataDirectory, directorySeting);
+			this.applicationResourcesDirectory = new File(this.getApplicationDataDirectory(), directorySeting);
 		}
 		return this.applicationResourcesDirectory;
 	}

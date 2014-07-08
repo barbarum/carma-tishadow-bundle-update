@@ -5,14 +5,14 @@ package ma.car.tishadow.bundle.update.tasks;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import ma.car.tishadow.bundle.update.RequestProxy;
-import ma.car.tishadow.bundle.update.util.TiAppUtil;
 
 import org.apache.commons.io.FileUtils;
-import org.appcelerator.kroll.common.Log;
 
-import android.content.Context;
+import android.util.Log;
 
 /**
  * Represents a single task to clear previous pending update.
@@ -28,21 +28,18 @@ public class ClearPendingUpdateTask implements Task {
 	 */
 	@Override
 	public boolean execute(RequestProxy context) {
-
-		Context applicationContext = context.getApplicationContext();
-
-		File appDataDirectory = applicationContext.getDir(TiAppUtil.APPLICATION_DATA_DIRECTORY_KEY, Context.MODE_PRIVATE);
-		File backupDirectory = new File(appDataDirectory, context.getApplicationProperties().getString(RequestProxy.Key.BACKUP_DIRECTORY, RequestProxy.Key.BACKUP_DIRECTORY));
-
-		Log.d(TAG, "AppDataDirectory : " + appDataDirectory + ", BackupDirectory : " + backupDirectory, Log.DEBUG_MODE);
+		Log.v(TAG, "Start clearing pending update ...");
+		List<File> backupDirectories = Arrays.asList(context.getDeprecatedPatchDirectory(), context.getBackupDirectory());
+		Log.i(TAG, "Clearing pending updates from " + backupDirectories);
 		try {
-			FileUtils.deleteDirectory(backupDirectory);
-			Log.i(TAG, "Clear pending update has been done.");
+			for (File directory : backupDirectories) {
+				FileUtils.deleteDirectory(directory);
+			}
+			Log.d(TAG, "Clear pending update has been done.");
 			return true;
 		} catch (IOException e) {
-			Log.e(TAG, "Failed to delete '" + backupDirectory + "'.", e);
+			Log.e(TAG, "Failed to delete '" + backupDirectories + "'.", e);
 		}
 		return false;
 	}
-
 }

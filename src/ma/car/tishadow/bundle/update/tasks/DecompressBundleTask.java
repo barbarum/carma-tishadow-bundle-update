@@ -10,9 +10,8 @@ import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.util.ZipUtil;
 
 import org.apache.commons.io.FileUtils;
-import org.appcelerator.kroll.common.Log;
 
-import android.content.Context;
+import android.util.Log;
 
 /**
  * Represents a single task to decompress latest bundle.
@@ -28,19 +27,16 @@ public class DecompressBundleTask implements Task {
 	 */
 	@Override
 	public boolean execute(RequestProxy context) {
-		Log.i(TAG, "Start DecompressBundleTask...");
+		Log.v(TAG, "Start DecompressBundleTask...");
 		Boolean result = doExecute(context);
 		context.markedBundleUpdateStateTo(result ? BundleUpdateState.DECOMPRESSED : BundleUpdateState.INTERRUPTED);
 		return result;
 	}
 
 	private boolean doExecute(RequestProxy context) {
-		Context applicationContext = context.getApplicationContext();
-		String bundleDecompressDirectory = (String) context.getRequestProperties().get(RequestProxy.Key.BUNDLE_DECOMPRESS_DIRECTORY);
 		String filename = (String) context.getRequestProperties().get(RequestProxy.Key.DOWNLOAD_DESTINATION_FILENAME);
-
-		File compressionFile = new File(applicationContext.getExternalFilesDir(null), filename);
-		File decompressDirectory = new File(applicationContext.getExternalFilesDir(null), bundleDecompressDirectory);
+		File compressionFile = new File(context.getExternalApplicationTemporaryDirectory(), filename);
+		File decompressDirectory = context.getPatchDirectory();
 
 		Log.i(TAG, "Extracting latest bundle '" + compressionFile + "' into '" + decompressDirectory + "'...");
 		if (!compressionFile.exists()) {
@@ -60,7 +56,7 @@ public class DecompressBundleTask implements Task {
 		}
 		ZipUtil.decompress(decompressDirectory.getAbsolutePath(), compressionFile.getAbsolutePath(), true);
 		compressionFile.delete();
-		Log.i(TAG, "Extract latest bundle done.");
+		Log.d(TAG, "Extract latest bundle done.");
 		return true;
 	}
 }

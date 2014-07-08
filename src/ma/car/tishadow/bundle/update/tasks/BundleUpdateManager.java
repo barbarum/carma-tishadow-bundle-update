@@ -13,6 +13,8 @@ import ma.car.tishadow.bundle.update.util.TiAppUtil.PropertyKey;
 import org.appcelerator.kroll.KrollFunction;
 import org.appcelerator.titanium.TiProperties;
 
+import android.util.Log;
+
 /**
  * TiShadow Bundle Update Manager
  * @author wei.ding
@@ -24,7 +26,7 @@ public class BundleUpdateManager implements Task, OnBundleUpdateStateChangedList
 	public BundleUpdateManager() {
 		super();
 
-		this.taskChain = new SeriesTask();
+		this.taskChain = new SeriesTask("BundleUpdateWorkflowTask");
 		this.initial();
 	}
 
@@ -57,7 +59,12 @@ public class BundleUpdateManager implements Task, OnBundleUpdateStateChangedList
 	 */
 	@Override
 	public boolean execute(RequestProxy context) {
-		return this.taskChain.execute(context);
+		Log.i("BundleUpdateManager", "Start executing bundle update tasks...");
+		context.setOnBundleUpdateStateChangedListener(this);
+		boolean result = this.taskChain.execute(context);
+		context.setOnBundleUpdateStateChangedListener(null);
+		Log.i("BundleUpdateManager", "Bundle update tasks have been executed completely.");
+		return result;
 	}
 
 	/**
@@ -68,7 +75,7 @@ public class BundleUpdateManager implements Task, OnBundleUpdateStateChangedList
 	public static boolean isLatestBundleApplied(RequestProxy context) {
 		TiProperties applicationProperties = context.getApplicationProperties();
 		long currentBundleVersion = applicationProperties.getInt(PropertyKey.CURRENT_BUNDLE_VERSION, -1);
-		Long latestBundleVersion = (Long) context.getRequestProperty(RequestProxy.Key.LATEST_BUNDLE_VERSION);
+		Integer latestBundleVersion = (Integer) context.getRequestProperty(RequestProxy.Key.LATEST_BUNDLE_VERSION);
 		return latestBundleVersion != null && latestBundleVersion == currentBundleVersion;
 	}
 

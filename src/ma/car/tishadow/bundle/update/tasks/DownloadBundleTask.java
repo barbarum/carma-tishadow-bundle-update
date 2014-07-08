@@ -38,18 +38,18 @@ public class DownloadBundleTask implements Task {
 	 */
 	@Override
 	public boolean execute(RequestProxy context) {
-		Log.d(TAG, "Starting DownloadBundleTask...");
+		Log.v(TAG, "Starting DownloadBundleTask...");
 		if (!BundleUpdateManager.isBundleDownloadRequired(context)) {
-			Log.d(TAG, "Don't need to download bundle, because already up-to-date.");
+			Log.i(TAG, "Don't need to download bundle, because already up-to-date.");
 			return true;
 		}
 		lock.lock();
 		try {
-			Log.i(TAG, "starting to downloading bundle...");
+			Log.d(TAG, "starting to downloading bundle...");
 			sendBundleDownloadRequest(context);
 			waitForDownloadComplete.await();
 			context.markedBundleUpdateStateTo(BundleUpdateState.DOWNLOADED);
-			Log.i(TAG, "DownloadBundleTask done.");
+			Log.d(TAG, "DownloadBundleTask done.");
 			return true;
 		} catch (InterruptedException e) {
 			context.markedBundleUpdateStateTo(BundleUpdateState.INTERRUPTED);
@@ -68,12 +68,11 @@ public class DownloadBundleTask implements Task {
 
 		applicationContext.registerReceiver(newDownloadCompleteHandler(context), new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 		DownloadManager downloadManager = (DownloadManager) applicationContext.getSystemService(Context.DOWNLOAD_SERVICE);
-
-		String bundleDownloadUrl = (String) context.getRequestProperties().get(RequestProxy.Key.BUNDLE_DOWNLOAD_URL);
-		String latestBundleVersion = (String) context.getRequestProperties().get(RequestProxy.Key.LATEST_BUNDLE_VERSION);
-		String bundleDecompressDirectory = (String) context.getRequestProperties().get(RequestProxy.Key.BUNDLE_DECOMPRESS_DIRECTORY);
+		String bundleDownloadUrl = (String) context.getRequestProperty(RequestProxy.Key.BUNDLE_DOWNLOAD_URL);
+		Object latestBundleVersion = context.getRequestProperty(RequestProxy.Key.LATEST_BUNDLE_VERSION);
+		String bundleDecompressDirectory = (String) context.getRequestProperty(RequestProxy.Key.BUNDLE_DECOMPRESS_DIRECTORY);
 		String bundleLocalFileName = bundleDecompressDirectory + ".zip";
-		File destination = new File(applicationContext.getExternalFilesDir(null), bundleLocalFileName);
+		File destination = new File(context.getExternalApplicationTemporaryDirectory(), bundleLocalFileName);
 
 		DownloadManager.Request request = new DownloadManager.Request(Uri.parse(bundleDownloadUrl));
 		request.setShowRunningNotification(Log.isDebugModeEnabled()).setVisibleInDownloadsUi(Log.isDebugModeEnabled());
@@ -99,13 +98,17 @@ public class DownloadBundleTask implements Task {
 			// href='https://code.google.com/p/android/issues/detail?id=18462' target='_blank'>issue 18462</a>, I may need to rewrite this component later.
 			@Override
 			public void onReceive(Context cxt, Intent intent) {
+				Log.i(TAG, "Receiving download complete event intent '" + intent + "'...");
 				lock.lock();
 				try {
 					long referenceId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L);
 					long storedReferenceId = (Long) context.getRequestProperties().get(RequestProxy.Key.DOWNLOADING_BUNDLE_REFID);
 					if (referenceId != -1 && referenceId == storedReferenceId) {
 						onBundleDownloadCompleted(context, intent);
+						context.getRequestProperties().remove(RequestProxy.Key.DOWNLOADING_BUNDLE_REFID);
+						cxt.unregisterReceiver(this);
 						waitForDownloadComplete.signal();
+
 					}
 				} finally {
 					lock.unlock();
@@ -131,7 +134,11 @@ public class DownloadBundleTask implements Task {
 			int status = cursor.getInt(statusIndex);
 			int reasonIndex = cursor.getColumnIndex(DownloadManager.COLUMN_REASON);
 			int reason = reasonIndex == -1 ? -1 : cursor.getInt(reasonIndex);
-			Log.i(TAG, "Bundle download completed, status(" + status + "), reason(" + reason + ").");
+
+			int localUriIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
+			String localUri = cursor.getString(localUriIndex);
+
+			Log.i(TAG, "Bundle download completed, status(" + status + "), reason(" + reason + "), local uri(" + localUri + ").");
 		}
 
 		cursor.close();

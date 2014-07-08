@@ -27,24 +27,23 @@ public class BackupAppTask implements Task {
 	 */
 	@Override
 	public boolean execute(RequestProxy context) {
+		Log.v(TAG, "Starting backup application task...");
 
 		File backupDirectory = context.getBackupDirectory();
 		File sourceDirectory = context.getApplicationResourcesDirectory();
-
 		Log.i(TAG, "Backup application resources '" + sourceDirectory + "' -> '" + backupDirectory + "'...");
 		try {
 			if (backupDirectory.exists()) {
 				FileUtils.cleanDirectory(backupDirectory);
 			}
 			if (sourceDirectory.exists()) {
-				FileUtils.copyDirectory(sourceDirectory, backupDirectory);
+				FileUtils.copyDirectoryToDirectory(sourceDirectory, backupDirectory);
 			}
-			Log.i(TAG, "Backup application resources done.");
+			Log.d(TAG, "Backup application resources done.");
 			return true;
 		} catch (IOException e) {
 			Log.e(TAG, "Failed to backup application resources.", e);
 		}
-
 		return false;
 	}
 }

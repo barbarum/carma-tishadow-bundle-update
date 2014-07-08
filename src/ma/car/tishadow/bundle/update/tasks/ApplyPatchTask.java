@@ -27,6 +27,7 @@ public class ApplyPatchTask implements Task {
 	 */
 	@Override
 	public boolean execute(RequestProxy context) {
+		Log.v(TAG, "Starting applying patch task...");
 
 		context.markedBundleUpdateStateTo(BundleUpdateState.APPLYING);
 
@@ -41,7 +42,7 @@ public class ApplyPatchTask implements Task {
 
 			if (patch == null || patch.isEmpty()) {
 				Log.i(TAG, "Already up-to-date!");
-				return true;
+				return false;
 			}
 			for (String item : patch.getFilesToDelete()) {
 				File file = new File(backupDirectory, item);
@@ -60,7 +61,7 @@ public class ApplyPatchTask implements Task {
 			FileUtils.copyFile(newManifest, oldManifest, false);
 			FileUtils.deleteDirectory(context.getPatchDirectory());
 
-			Log.i(TAG, "Apply Patch done.");
+			Log.d(TAG, "Apply Patch done.");
 			return true;
 		} catch (IOException e) {
 			context.markedBundleUpdateStateTo(BundleUpdateState.INTERRUPTED);

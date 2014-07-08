@@ -3,31 +3,32 @@
  */
 package ma.car.tishadow.bundle.update.tasks;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import android.util.Log;
 import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.TishadowBundleUpdateModule;
 import ma.car.tishadow.bundle.update.util.TiAppUtil;
+import android.util.Log;
 
 /**
  * @author wei.ding
  */
 public class ParallelTask extends ArrayList<Task> implements Task {
 
-	private static final String TAG = "ParallelTask";
-
 	private static final long serialVersionUID = TishadowBundleUpdateModule.BACKWARD_COMPATIBLE_UID;
 
-	public ParallelTask() {
-		super();
-	}
+	private static final AtomicInteger PARALLEL_TASK_IDENTIFIER = new AtomicInteger(1);
 
-	public ParallelTask(Collection<? extends Task> c) {
-		super(c);
+	private final String name;
+
+	private final int identifier;
+
+	public ParallelTask() {
+		this((String) null);
 	}
 
 	/**
@@ -35,7 +36,16 @@ public class ParallelTask extends ArrayList<Task> implements Task {
 	 * @param tasks
 	 */
 	public ParallelTask(Task... tasks) {
-		this();
+		this((String) null, tasks);
+	}
+
+	/**
+	 * Add a list of tasks into current task, which can be executed in parallel.
+	 * @param tasks
+	 */
+	public ParallelTask(String name, Task... tasks) {
+		this.name = name == null ? this.getClass().getName() : name;
+		this.identifier = PARALLEL_TASK_IDENTIFIER.getAndIncrement();
 		for (Task task : tasks) {
 			this.add(task);
 		}
@@ -48,8 +58,10 @@ public class ParallelTask extends ArrayList<Task> implements Task {
 	@Override
 	public boolean execute(final RequestProxy context) {
 		if (this.size() == 0) {
+			Log.i(getTag(), MessageFormat.format("No tasks in current parallel task ''{0}'', marked it as executed successfully.", this.getName()));
 			return true;
 		}
+		Log.i(getTag(), "Starting parallel task '" + this.getName() + "'...");
 		final CountDownLatch latch = new CountDownLatch(this.size());
 		final AtomicBoolean expectedResult = new AtomicBoolean(true);
 		for (final Task task : this) {
@@ -57,9 +69,12 @@ public class ParallelTask extends ArrayList<Task> implements Task {
 		}
 		try {
 			latch.await();
+			if (expectedResult.get()) {
+				Log.i(getTag(), "Parallel task '" + this.getName() + "' executed successfully.");
+			}
 			return expectedResult.get();
 		} catch (InterruptedException e) {
-			Log.e(TAG, "ParallelTask '" + this + "' has been interrupted.");
+			Log.e(getTag(), "Task '" + this.getName() + "' has been interrupted.");
 		}
 		return false;
 	}
@@ -72,15 +87,27 @@ public class ParallelTask extends ArrayList<Task> implements Task {
 				boolean result = task.execute(context);
 				if (!result) {
 					if (expectedResult.compareAndSet(true, false)) {
-						Log.i(TAG, "ParallelTask '" + ParallelTask.this + "' failed because fail to execute " + task);
+						String message = "ParallelTask ''{0}'' executed completely because fail to execute ''{1}''.";
+						Log.i(getTag(), MessageFormat.format(message, ParallelTask.this.getName(), task.getClass().getName()));
 					} else {
-						Log.i(TAG, "The result of ParallelTask '" + ParallelTask.this + "' has been set to false.");
+						Log.i(getTag(), "The result of ParallelTask '" + ParallelTask.this.getName() + "' has been set to false.");
 					}
 				}
+				Log.i(getTag(), "Task '" + task.getClass().getName() + "' executed successfully.");
 				latch.countDown();
 			}
 
 		});
 	}
 
+	private String getTag() {
+		return this.getClass().getSimpleName() + "-" + this.identifier;
+	}
+
+	/**
+	 * @return the name
+	 */
+	private String getName() {
+		return name;
+	}
 }

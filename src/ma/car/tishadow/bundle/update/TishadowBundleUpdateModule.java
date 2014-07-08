@@ -8,6 +8,7 @@
 package ma.car.tishadow.bundle.update;
 
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import ma.car.tishadow.bundle.update.tasks.BundleUpdateManager;
 import ma.car.tishadow.bundle.update.util.TiAppUtil;
@@ -15,8 +16,9 @@ import ma.car.tishadow.bundle.update.util.TiAppUtil;
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
-import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.TiApplication;
+
+import android.util.Log;
 
 @Kroll.module(name = "TishadowBundleUpdate", id = "ma.car.tishadow.bundle.update")
 public class TishadowBundleUpdateModule extends KrollModule {
@@ -26,6 +28,8 @@ public class TishadowBundleUpdateModule extends KrollModule {
 	public static final long BACKWARD_COMPATIBLE_UID = 1L;
 
 	private LinkedBlockingQueue<RequestProxy> queue;
+
+	private final AtomicBoolean isBundleUpdateInProgress = new AtomicBoolean(false);
 
 	public TishadowBundleUpdateModule() {
 		super();
@@ -42,15 +46,21 @@ public class TishadowBundleUpdateModule extends KrollModule {
 
 	// Public methods
 	@Kroll.method
-	public void send(final RequestProxy request) {
+	public void send(final KrollDict dict) {
+		RequestProxy request = new RequestProxy(this.getActivity());
+
 		request.setJavascriptContext(getKrollObject());
+		request.applyProperties(dict);
+		request.setRequestProperties(dict);
+		
 		queue.add(request);
+
 		handleRequest();
 	}
 
 	private void handleRequest() {
 		final RequestProxy request = queue.poll();
-		if (request == null) {
+		if (request == null || !this.isBundleUpdateInProgress.compareAndSet(false, true)) {
 			return;
 		}
 		TiAppUtil.THREAD_POOL.execute(new Runnable() {
@@ -58,6 +68,7 @@ public class TishadowBundleUpdateModule extends KrollModule {
 			@Override
 			public void run() {
 				new BundleUpdateManager().execute(request);
+				TishadowBundleUpdateModule.this.isBundleUpdateInProgress.set(false);
 				handleRequest();
 			}
 
@@ -82,6 +93,8 @@ public class TishadowBundleUpdateModule extends KrollModule {
 	public RequestProxy createRequest(KrollDict dict) {
 		RequestProxy request = new RequestProxy(this.getActivity());
 		request.setJavascriptContext(getKrollObject());
+		request.applyProperties(dict);
+		request.setRequestProperties(dict);
 		return request;
 	}
 }
