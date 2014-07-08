@@ -55,8 +55,6 @@ public class RequestProxy extends KrollProxy {
 
 	private File externalApplicationTemporaryDirectory;
 
-	private File deprecatedPathDirectory;
-
 	private OnBundleUpdateStateChangedListener onBundleUpdateStateChangedListener;
 
 	public RequestProxy(TiContext tiContext) {
@@ -193,27 +191,15 @@ public class RequestProxy extends KrollProxy {
 
 	/**
 	 * Gets backup directory, also called 'standby' directory, which is used to backup current application resources, and will be updated later whenever the
-	 * bundle is ready to apply. This backup directory on android looks like: "/mnt/sdcard/Android/data/[appID]/tmp/[standby_dir]"
+	 * bundle is ready to apply. This backup directory on android looks like: "/data/data/[appID]/app_appData/[standby_dir]"
 	 * @return {@link File} point to backup directory on external storage.
 	 */
 	public File getBackupDirectory() {
 		if (this.backupDirectory == null) {
-			String backupProp = (String) this.getRequestProperty(RequestProxy.Key.BACKUP_DIRECTORY);
-			this.backupDirectory = new File(getExternalApplicationTemporaryDirectory(), backupProp);
+			String backupDirectoryName = (String) this.getRequestProperty(RequestProxy.Key.BACKUP_DIRECTORY);
+			this.backupDirectory = new File(this.getApplicationDataDirectory(), backupDirectoryName);
 		}
 		return this.backupDirectory;
-	}
-
-	/**
-	 * Gets deprecated patch directory, which is used to bundle update by tishadow in old way.
-	 * @return
-	 */
-	public File getDeprecatedPatchDirectory() {
-		if (this.deprecatedPathDirectory == null) {
-			String backupDirectoryName = (String) this.getRequestProperty(RequestProxy.Key.BACKUP_DIRECTORY);
-			this.deprecatedPathDirectory = new File(this.getApplicationDataDirectory(), backupDirectoryName);
-		}
-		return this.deprecatedPathDirectory;
 	}
 
 	private File getExternalApplicationBaseDirectory() {
@@ -265,6 +251,14 @@ public class RequestProxy extends KrollProxy {
 			this.applicationResourcesDirectory = new File(this.getApplicationDataDirectory(), directorySeting);
 		}
 		return this.applicationResourcesDirectory;
+	}
+
+	/**
+	 * Gets application resources' base directory name.
+	 * @return
+	 */
+	public String getApplicationResourcesDirectoryName() {
+		return (String) this.getRequestProperties().get(RequestProxy.Key.APP_NAME);
 	}
 
 	/**

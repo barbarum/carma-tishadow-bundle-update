@@ -1,12 +1,13 @@
 package ma.car.tishadow.bundle.update.tasks;
 
+import java.io.File;
 import java.io.IOException;
 
 import ma.car.tishadow.bundle.update.RequestProxy;
 
 import org.apache.commons.io.FileUtils;
 
-import android.util.Log;
+import org.appcelerator.kroll.common.Log;
 
 /**
  * Apply bundle update into current application.
@@ -25,9 +26,10 @@ public class ApplyUpdateTask implements Task {
 		Log.v(TAG, "Starting applying update task...");
 		try {
 			FileUtils.deleteDirectory(context.getApplicationResourcesDirectory());
-			FileUtils.copyDirectoryToDirectory(context.getBackupDirectory(), context.getApplicationResourcesDirectory());
-			FileUtils.deleteDirectory(context.getExternalApplicationTemporaryDirectory());
+			new File(context.getBackupDirectory().getAbsolutePath()).renameTo(context.getApplicationResourcesDirectory());
 			context.markedBundleUpdateStateTo(BundleUpdateState.APPLYED);
+			Log.v(TAG, "Check if standby directory exists ? - " + context.getBackupDirectory().exists());
+			Log.v(TAG, "Check if base directory exists ? - " + context.getApplicationResourcesDirectory().exists());
 			Log.d(TAG, "Applying update done.");
 			return true;
 		} catch (IOException e) {

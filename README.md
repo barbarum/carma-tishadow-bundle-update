@@ -36,3 +36,15 @@ Getting Started
 ======================
 ---------Working in Progress
 
+
+
+
+
+
+
+
+Backlog
+======================
+1. Breakpoint resume for bundle update from the application re-launch
+2. Force application roll back to specific version
+3. Force application to do bundle update again

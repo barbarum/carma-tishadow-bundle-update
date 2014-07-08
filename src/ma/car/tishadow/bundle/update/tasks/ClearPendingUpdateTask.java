@@ -5,14 +5,12 @@ package ma.car.tishadow.bundle.update.tasks;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 import ma.car.tishadow.bundle.update.RequestProxy;
 
 import org.apache.commons.io.FileUtils;
 
-import android.util.Log;
+import org.appcelerator.kroll.common.Log;
 
 /**
  * Represents a single task to clear previous pending update.
@@ -29,16 +27,14 @@ public class ClearPendingUpdateTask implements Task {
 	@Override
 	public boolean execute(RequestProxy context) {
 		Log.v(TAG, "Start clearing pending update ...");
-		List<File> backupDirectories = Arrays.asList(context.getDeprecatedPatchDirectory(), context.getBackupDirectory());
-		Log.i(TAG, "Clearing pending updates from " + backupDirectories);
+		File backupDirectory = context.getBackupDirectory();
+		Log.i(TAG, "Clearing pending updates from " + backupDirectory);
 		try {
-			for (File directory : backupDirectories) {
-				FileUtils.deleteDirectory(directory);
-			}
+			FileUtils.deleteDirectory(backupDirectory);
 			Log.d(TAG, "Clear pending update has been done.");
 			return true;
 		} catch (IOException e) {
-			Log.e(TAG, "Failed to delete '" + backupDirectories + "'.", e);
+			Log.e(TAG, "Failed to delete '" + backupDirectory + "'.", e);
 		}
 		return false;
 	}

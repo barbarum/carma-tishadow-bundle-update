@@ -10,7 +10,7 @@ import ma.car.tishadow.bundle.update.RequestProxy;
 
 import org.apache.commons.io.FileUtils;
 
-import android.util.Log;
+import org.appcelerator.kroll.common.Log;
 
 /**
  * Represents a single task to backup current application resource into backup directory, which will be used to compare with latest bundle contents, and apply

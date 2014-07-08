@@ -10,8 +10,9 @@ import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.util.ManifestUtil;
 
 import org.apache.commons.io.FileUtils;
+import org.appcelerator.kroll.common.Log;
 
-import android.util.Log;
+//import org.appcelerator.kroll.common.Log;
 
 /**
  * Represents a single task to apply patch into backup directory.

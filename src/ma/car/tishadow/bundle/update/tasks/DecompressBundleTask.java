@@ -11,7 +11,7 @@ import ma.car.tishadow.bundle.update.util.ZipUtil;
 
 import org.apache.commons.io.FileUtils;
 
-import android.util.Log;
+import org.appcelerator.kroll.common.Log;
 
 /**
  * Represents a single task to decompress latest bundle.
@@ -36,6 +36,7 @@ public class DecompressBundleTask implements Task {
 	private boolean doExecute(RequestProxy context) {
 		String filename = (String) context.getRequestProperties().get(RequestProxy.Key.DOWNLOAD_DESTINATION_FILENAME);
 		File compressionFile = new File(context.getExternalApplicationTemporaryDirectory(), filename);
+		
 		File decompressDirectory = context.getPatchDirectory();
 
 		Log.i(TAG, "Extracting latest bundle '" + compressionFile + "' into '" + decompressDirectory + "'...");

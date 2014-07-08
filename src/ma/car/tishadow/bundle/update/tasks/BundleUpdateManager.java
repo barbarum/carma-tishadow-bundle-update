@@ -13,7 +13,7 @@ import ma.car.tishadow.bundle.update.util.TiAppUtil.PropertyKey;
 import org.appcelerator.kroll.KrollFunction;
 import org.appcelerator.titanium.TiProperties;
 
-import android.util.Log;
+import org.appcelerator.kroll.common.Log;
 
 /**
  * TiShadow Bundle Update Manager
@@ -76,7 +76,7 @@ public class BundleUpdateManager implements Task, OnBundleUpdateStateChangedList
 		TiProperties applicationProperties = context.getApplicationProperties();
 		long currentBundleVersion = applicationProperties.getInt(PropertyKey.CURRENT_BUNDLE_VERSION, -1);
 		Integer latestBundleVersion = (Integer) context.getRequestProperty(RequestProxy.Key.LATEST_BUNDLE_VERSION);
-		return latestBundleVersion != null && latestBundleVersion == currentBundleVersion;
+		return latestBundleVersion != null && latestBundleVersion <= currentBundleVersion;
 	}
 
 	/**

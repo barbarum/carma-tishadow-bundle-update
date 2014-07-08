@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.TishadowBundleUpdateModule;
 import ma.car.tishadow.bundle.update.util.TiAppUtil;
-import android.util.Log;
+import org.appcelerator.kroll.common.Log;
 
 /**
  * @author wei.ding

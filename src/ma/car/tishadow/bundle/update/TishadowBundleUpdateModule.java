@@ -18,7 +18,7 @@ import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.titanium.TiApplication;
 
-import android.util.Log;
+import org.appcelerator.kroll.common.Log;
 
 @Kroll.module(name = "TishadowBundleUpdate", id = "ma.car.tishadow.bundle.update")
 public class TishadowBundleUpdateModule extends KrollModule {

@@ -5,7 +5,7 @@ package ma.car.tishadow.bundle.update.tasks;
 
 import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.util.TiAppUtil.PropertyKey;
-import android.util.Log;
+import org.appcelerator.kroll.common.Log;
 
 /**
  * @author wei.ding
@@ -44,18 +44,21 @@ public class CheckBundleTask implements Task {
 	}
 
 	private void logBundleInfo(RequestProxy context, String updateType) {
-		if (!Log.isLoggable(TAG, Log.VERBOSE)) {
+		if (!Log.isDebugModeEnabled()) {
 			return;
 		}
 		int currentBundleVersion = context.getApplicationProperties().getInt(PropertyKey.CURRENT_BUNDLE_VERSION, -1);
 		Object latestBundleVersion = context.getRequestProperty(RequestProxy.Key.LATEST_BUNDLE_VERSION);
 		StringBuilder builder = new StringBuilder();
-		builder.append("===========================App Bundle Info===========================");
+		builder.append("==================App Bundle Info==================");
 		builder.append("\nUpdate type: " + updateType);
 		builder.append("\nLocal bundle: " + currentBundleVersion);
 		builder.append("\nLatest bundle:" + latestBundleVersion);
 		builder.append("\nAppData Dir: " + context.getApplicationDataDirectory());
-		builder.append("\nTemp Dir: " + context.getExternalApplicationTemporaryDirectory());
+		builder.append("\nAppTmp Dir: " + context.getExternalApplicationTemporaryDirectory());
+		builder.append("\nApplication Resources Dir: " + context.getApplicationResourcesDirectory());
+		builder.append("\nBackup Dir: " + context.getBackupDirectory());
+		builder.append("\nBundle Dir: " + context.getPatchDirectory());
 		builder.append("\n=====================================================================");
 		Log.v(TAG, builder.toString());
 	}

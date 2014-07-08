@@ -41,7 +41,7 @@ public class DownloadBundleTask implements Task {
 		Log.v(TAG, "Starting DownloadBundleTask...");
 		if (!BundleUpdateManager.isBundleDownloadRequired(context)) {
 			Log.i(TAG, "Don't need to download bundle, because already up-to-date.");
-			return true;
+			return false;
 		}
 		lock.lock();
 		try {
