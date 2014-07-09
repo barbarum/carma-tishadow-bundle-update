@@ -69,7 +69,7 @@ public class DownloadBundleTask implements Task {
 		applicationContext.registerReceiver(newDownloadCompleteHandler(context), new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 		DownloadManager downloadManager = (DownloadManager) applicationContext.getSystemService(Context.DOWNLOAD_SERVICE);
 		String bundleDownloadUrl = (String) context.getRequestProperty(RequestProxy.Key.BUNDLE_DOWNLOAD_URL);
-		Object latestBundleVersion = context.getRequestProperty(RequestProxy.Key.LATEST_BUNDLE_VERSION);
+		
 		String bundleDecompressDirectory = (String) context.getRequestProperty(RequestProxy.Key.BUNDLE_DECOMPRESS_DIRECTORY);
 		String bundleLocalFileName = bundleDecompressDirectory + ".zip";
 		File destination = new File(context.getExternalApplicationTemporaryDirectory(), bundleLocalFileName);
@@ -77,13 +77,15 @@ public class DownloadBundleTask implements Task {
 		DownloadManager.Request request = new DownloadManager.Request(Uri.parse(bundleDownloadUrl));
 		request.setShowRunningNotification(Log.isDebugModeEnabled()).setVisibleInDownloadsUi(Log.isDebugModeEnabled());
 		request.setDestinationUri(Uri.fromFile(destination));
+		
 		long downloadId = downloadManager.enqueue(request);
 
 		context.getRequestProperties().put(RequestProxy.Key.DOWNLOADING_BUNDLE_REFID, new Long(downloadId));
 		context.getRequestProperties().put(RequestProxy.Key.DOWNLOAD_DESTINATION_FILENAME, bundleLocalFileName);
+		
 		context.markedBundleUpdateStateTo(BundleUpdateState.DOWNLOADING);
 
-		Log.i(TAG, "Downloading bundle '" + latestBundleVersion + "' from '" + bundleDownloadUrl + "' into directory '" + destination + "'... ");
+		Log.i(TAG, "Downloading bundle '" + context.getLatestBundleVerion() + "' from '" + bundleDownloadUrl + "' into directory '" + destination + "'... ");
 	}
 
 	/**

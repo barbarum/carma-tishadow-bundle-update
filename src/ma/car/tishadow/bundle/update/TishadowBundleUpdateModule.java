@@ -10,15 +10,17 @@ package ma.car.tishadow.bundle.update;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import ma.car.tishadow.bundle.update.tasks.ApplyBundleUpdateOnlineTask;
 import ma.car.tishadow.bundle.update.tasks.BundleUpdateManager;
+import ma.car.tishadow.bundle.update.tasks.DefaultBundleUpdateStateListener;
+import ma.car.tishadow.bundle.update.tasks.Task;
 import ma.car.tishadow.bundle.update.util.TiAppUtil;
 
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
-import org.appcelerator.titanium.TiApplication;
-
 import org.appcelerator.kroll.common.Log;
+import org.appcelerator.titanium.TiApplication;
 
 @Kroll.module(name = "TishadowBundleUpdate", id = "ma.car.tishadow.bundle.update")
 public class TishadowBundleUpdateModule extends KrollModule {
@@ -31,9 +33,12 @@ public class TishadowBundleUpdateModule extends KrollModule {
 
 	private final AtomicBoolean isBundleUpdateInProgress = new AtomicBoolean(false);
 
+	private final BundleUpdateStateListener stateChangedListener;
+
 	public TishadowBundleUpdateModule() {
 		super();
 		queue = new LinkedBlockingQueue<RequestProxy>();
+		this.stateChangedListener = new DefaultBundleUpdateStateListener();
 	}
 
 	@Kroll.onAppCreate
@@ -52,13 +57,28 @@ public class TishadowBundleUpdateModule extends KrollModule {
 		request.setJavascriptContext(getKrollObject());
 		request.applyProperties(dict);
 		request.setRequestProperties(dict);
-		
+
 		queue.add(request);
 
-		handleRequest();
+		handleRequest(new BundleUpdateManager());
 	}
 
-	private void handleRequest() {
+	@Kroll.method
+	public void applyUpdateOnline(final KrollDict dict) {
+
+		RequestProxy request = new RequestProxy(this.getActivity());
+
+		request.setJavascriptContext(getKrollObject());
+		request.applyProperties(dict);
+		request.setRequestProperties(dict);
+
+		queue.add(request);
+
+		handleRequest(new ApplyBundleUpdateOnlineTask());
+
+	}
+
+	private void handleRequest(final Task task) {
 		final RequestProxy request = queue.poll();
 		if (request == null || !this.isBundleUpdateInProgress.compareAndSet(false, true)) {
 			return;
@@ -67,9 +87,11 @@ public class TishadowBundleUpdateModule extends KrollModule {
 
 			@Override
 			public void run() {
-				new BundleUpdateManager().execute(request);
+				request.setOnBundleUpdateStateChangedListener(stateChangedListener);
+				task.execute(request);
+				request.setOnBundleUpdateStateChangedListener(null);
 				TishadowBundleUpdateModule.this.isBundleUpdateInProgress.set(false);
-				handleRequest();
+				handleRequest(task);
 			}
 
 		});

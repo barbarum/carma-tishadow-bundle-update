@@ -8,7 +8,7 @@ import ma.car.tishadow.bundle.update.tasks.BundleUpdateState;
 /**
  * @author wei.ding
  */
-public interface OnBundleUpdateStateChangedListener {
+public interface BundleUpdateStateListener {
 
 	/**
 	 * Triggered when on bundle update state changed

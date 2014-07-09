@@ -34,20 +34,14 @@ public class TiAppUtil {
 		public static final String CURRENT_BUNDLE_VERSION = "bundleVersion";
 
 		/**
-		 * Update Ready Key
-		 */
-		public static final String UPDATE_READY_KEY = "updateReady";
-
-		/**
 		 * Updated Version's key
 		 */
 		public static final String UPDATE_VERSION_KEY = "updateVersion";
 
 		/**
-		 * Installed revision's key.
+		 * Update ready sign's key
 		 */
-		public static final String CURRENT_INSTALLED_REVISION = "installed.revision";
-
+		public static final String UPDATE_READY_SIGN_KEY = "updateReady";
 	}
 
 }

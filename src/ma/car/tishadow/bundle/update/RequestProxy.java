@@ -4,12 +4,15 @@
 package ma.car.tishadow.bundle.update;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import ma.car.tishadow.bundle.update.tasks.BundleUpdateState;
+import ma.car.tishadow.bundle.update.util.ManifestParseException;
 import ma.car.tishadow.bundle.update.util.ManifestUtil;
 import ma.car.tishadow.bundle.update.util.TiAppUtil;
+import ma.car.tishadow.bundle.update.util.TiAppUtil.PropertyKey;
 
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollFunction;
@@ -55,7 +58,7 @@ public class RequestProxy extends KrollProxy {
 
 	private File externalApplicationTemporaryDirectory;
 
-	private OnBundleUpdateStateChangedListener onBundleUpdateStateChangedListener;
+	private BundleUpdateStateListener onBundleUpdateStateChangedListener;
 
 	public RequestProxy(TiContext tiContext) {
 		this(tiContext.getActivity());
@@ -274,26 +277,46 @@ public class RequestProxy extends KrollProxy {
 	}
 
 	/**
-	 * Gets specific bundle's manifest by the specific directory.
-	 * @param directory
-	 * @return
-	 */
-	public File getBundleManifest(File directory) {
-		return new File(directory, ManifestUtil.MANIFEST_FILENAME);
-	}
-
-	/**
 	 * @return the onBundleUpdateStateChangedListener
 	 */
-	public OnBundleUpdateStateChangedListener getOnBundleUpdateStateChangedListener() {
+	public BundleUpdateStateListener getOnBundleUpdateStateChangedListener() {
 		return onBundleUpdateStateChangedListener;
 	}
 
 	/**
 	 * @param onBundleUpdateStateChangedListener the onBundleUpdateStateChangedListener to set
 	 */
-	public void setOnBundleUpdateStateChangedListener(OnBundleUpdateStateChangedListener onBundleUpdateStateChangedListener) {
+	public void setOnBundleUpdateStateChangedListener(BundleUpdateStateListener onBundleUpdateStateChangedListener) {
 		this.onBundleUpdateStateChangedListener = onBundleUpdateStateChangedListener;
+	}
+
+	/**
+	 * Gets latest bundle version from request parameter.
+	 * @return the value of 'latest_bundle_version' in request parameters, -1 if no such a parameter.
+	 * @throws NumberFormatException - if the value of 'latest_bundle_version' is not a number.
+	 */
+	public long getLatestBundleVerion() {
+		Object latestBundleVersion = this.getRequestProperty(RequestProxy.Key.LATEST_BUNDLE_VERSION);
+		return latestBundleVersion == null ? -1 : Long.parseLong(latestBundleVersion.toString());
+	}
+
+	/**
+	 * Clear bundle update information.
+	 */
+	public void clearBundleUpdateInfo() {
+		getApplicationProperties().setBool(PropertyKey.UPDATE_READY_SIGN_KEY, false);
+		getApplicationProperties().removeProperty(PropertyKey.UPDATE_VERSION_KEY);
+	}
+
+	/**
+	 * Set bundle update information from the manifest of standby directory.
+	 * @throws IOException
+	 * @throws ManifestParseException
+	 */
+	public void setBundleUpdateInfo() throws IOException, ManifestParseException {
+		getApplicationProperties().setBool(PropertyKey.UPDATE_READY_SIGN_KEY, true);
+		int updateVersion = (int) ManifestUtil.readBundleVersion(ManifestUtil.getBundleManifest(getBackupDirectory()));
+		getApplicationProperties().setInt(PropertyKey.UPDATE_VERSION_KEY, updateVersion);
 	}
 
 	public static class Key {

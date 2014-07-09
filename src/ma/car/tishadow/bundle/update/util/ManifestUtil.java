@@ -19,13 +19,13 @@ import java.util.Map;
  */
 public final class ManifestUtil {
 
-	public static class Patch {
+	public static class PatchInfo {
 
 		private List<String> filesToDelete;
 		private List<String> filesToAdd;
 		private List<String> filesToUpdate;
 
-		public Patch() {
+		public PatchInfo() {
 			super();
 			this.filesToAdd = new ArrayList<String>();
 			this.filesToUpdate = new ArrayList<String>();
@@ -67,12 +67,12 @@ public final class ManifestUtil {
 	 * @return
 	 * @throws IOException
 	 */
-	public static Patch compareManifest(File oldManifest, File newManifest) throws IOException {
+	public static PatchInfo compareManifest(File oldManifest, File newManifest) throws IOException {
 
 		Map<String, String> oldManifestMap = translate(oldManifest);
 		Map<String, String> newManifestMap = translate(newManifest);
 
-		Patch patch = new Patch();
+		PatchInfo patch = new PatchInfo();
 		for (Map.Entry<String, String> entry : newManifestMap.entrySet()) {
 			if (!oldManifestMap.containsKey(entry)) {
 				patch.getFilesToAdd().add(entry.getKey());
@@ -120,7 +120,7 @@ public final class ManifestUtil {
 	 * @throws IOException
 	 * @throws ManifestParseException
 	 */
-	public static boolean readBundleUpdateType(File manifest) throws IOException, ManifestParseException {
+	public static boolean isBundleRequireForceUpdate(File manifest) throws IOException, ManifestParseException {
 		if (manifest == null || !manifest.exists()) {
 			return false;
 		}
@@ -172,6 +172,15 @@ public final class ManifestUtil {
 			closeInputStream(reader);
 		}
 		return map;
+	}
+
+	/**
+	 * Gets specific bundle's manifest by the specific directory.
+	 * @param directory
+	 * @return
+	 */
+	public static File getBundleManifest(File directory) {
+		return new File(directory, MANIFEST_FILENAME);
 	}
 
 }

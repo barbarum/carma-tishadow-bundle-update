@@ -9,7 +9,6 @@ import java.io.IOException;
 import ma.car.tishadow.bundle.update.RequestProxy;
 
 import org.apache.commons.io.FileUtils;
-
 import org.appcelerator.kroll.common.Log;
 
 /**

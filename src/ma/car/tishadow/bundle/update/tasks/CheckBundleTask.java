@@ -5,6 +5,7 @@ package ma.car.tishadow.bundle.update.tasks;
 
 import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.util.TiAppUtil.PropertyKey;
+
 import org.appcelerator.kroll.common.Log;
 
 /**
@@ -31,10 +32,10 @@ public class CheckBundleTask implements Task {
 		String updateType = (String) context.getRequestProperty(RequestProxy.Key.UPDATE_TYPE);
 		logBundleInfo(context, updateType);
 		if ("feature_toggle".equalsIgnoreCase(updateType)) {
-			if (!BundleUpdateManager.isLatestBundleApplied(context)) {
+			if (!BundleUpdateManager.isLatestBundleApplied(context) && !BundleUpdateManager.isLatestBundleReadyForApply(context)) {
 				new ClearPendingUpdateTask().execute(context);
+				return true;
 			}
-			return true;
 		}
 		if ("dev_update".equalsIgnoreCase(updateType)) {
 			new ClearPendingUpdateTask().execute(context);
@@ -48,12 +49,11 @@ public class CheckBundleTask implements Task {
 			return;
 		}
 		int currentBundleVersion = context.getApplicationProperties().getInt(PropertyKey.CURRENT_BUNDLE_VERSION, -1);
-		Object latestBundleVersion = context.getRequestProperty(RequestProxy.Key.LATEST_BUNDLE_VERSION);
 		StringBuilder builder = new StringBuilder();
 		builder.append("==================App Bundle Info==================");
 		builder.append("\nUpdate type: " + updateType);
 		builder.append("\nLocal bundle: " + currentBundleVersion);
-		builder.append("\nLatest bundle:" + latestBundleVersion);
+		builder.append("\nLatest bundle:" + context.getLatestBundleVerion());
 		builder.append("\nAppData Dir: " + context.getApplicationDataDirectory());
 		builder.append("\nAppTmp Dir: " + context.getExternalApplicationTemporaryDirectory());
 		builder.append("\nApplication Resources Dir: " + context.getApplicationResourcesDirectory());
