@@ -6,6 +6,7 @@ package ma.car.tishadow.bundle.update.tasks;
 import java.io.File;
 import java.io.IOException;
 
+import ma.car.tishadow.bundle.update.BundleUpdateState;
 import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.util.ManifestUtil;
 

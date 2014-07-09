@@ -3,6 +3,7 @@
  */
 package ma.car.tishadow.bundle.update.tasks;
 
+import ma.car.tishadow.bundle.update.BundleUpdateState;
 import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.util.TiAppUtil.PropertyKey;
 

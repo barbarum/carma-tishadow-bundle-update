@@ -48,3 +48,4 @@ Backlog
 1. Breakpoint resume for bundle update from the application re-launch
 2. Force application roll back to specific version
 3. Force application to do bundle update again
+4. Refactor critical path codes, make codes more readable and easy understood.

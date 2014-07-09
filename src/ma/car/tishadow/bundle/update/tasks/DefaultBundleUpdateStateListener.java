@@ -5,6 +5,7 @@ package ma.car.tishadow.bundle.update.tasks;
 
 import java.util.HashMap;
 
+import ma.car.tishadow.bundle.update.BundleUpdateState;
 import ma.car.tishadow.bundle.update.BundleUpdateStateListener;
 import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.util.ManifestUtil;

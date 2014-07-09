@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.TishadowBundleUpdateModule;
+
 import org.appcelerator.kroll.common.Log;
 
 /**
@@ -93,6 +94,7 @@ public class SeriesTask extends LinkedList<Task> implements Task {
 	}
 
 	private String getTag() {
-		return this.getClass().getSimpleName() + "-" + this.identifier;
+		String simpleName = this.getClass().getSimpleName();
+		return ("".equals(simpleName) ? "SeriesTask" : simpleName) + "-" + this.identifier;
 	}
 }

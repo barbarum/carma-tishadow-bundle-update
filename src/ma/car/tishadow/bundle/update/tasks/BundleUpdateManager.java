@@ -3,6 +3,7 @@
  */
 package ma.car.tishadow.bundle.update.tasks;
 
+import ma.car.tishadow.bundle.update.BundleUpdateState;
 import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.TishadowBundleUpdateModule;
 import ma.car.tishadow.bundle.update.util.TiAppUtil.PropertyKey;
@@ -36,10 +37,10 @@ public class BundleUpdateManager implements Task {
 			 * @see ma.car.tishadow.bundle.update.tasks.ParallelTask#execute(ma.car.tishadow.bundle.update.RequestProxy)
 			 */
 			@Override
-			public boolean execute(RequestProxy context) {
-				boolean result = super.execute(context);
+			public boolean execute(RequestProxy request) {
+				boolean result = super.execute(request);
 				if (!result) {
-					context.markedBundleUpdateStateTo(BundleUpdateState.INTERRUPTED);
+					request.markedBundleUpdateStateTo(BundleUpdateState.INTERRUPTED);
 				}
 				return result;
 			}

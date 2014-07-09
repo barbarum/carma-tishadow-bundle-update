@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import ma.car.tishadow.bundle.update.tasks.BundleUpdateState;
 import ma.car.tishadow.bundle.update.util.ManifestParseException;
 import ma.car.tishadow.bundle.update.util.ManifestUtil;
 import ma.car.tishadow.bundle.update.util.TiAppUtil;

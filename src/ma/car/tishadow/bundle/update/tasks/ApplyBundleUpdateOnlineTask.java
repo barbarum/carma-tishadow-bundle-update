@@ -3,7 +3,11 @@ package ma.car.tishadow.bundle.update.tasks;
 import java.io.File;
 import java.io.IOException;
 
+import ma.car.tishadow.bundle.update.BundleUpdateState;
 import ma.car.tishadow.bundle.update.RequestProxy;
+import ma.car.tishadow.bundle.update.util.ManifestParseException;
+import ma.car.tishadow.bundle.update.util.ManifestUtil;
+import ma.car.tishadow.bundle.update.util.TiAppUtil;
 
 import org.apache.commons.io.FileUtils;
 import org.appcelerator.kroll.common.Log;
@@ -21,16 +25,17 @@ public class ApplyBundleUpdateOnlineTask implements Task {
 	 * @see ma.car.tishadow.bundle.update.tasks.Task#execute(ma.car.tishadow.bundle.update.tasks.TaskContext)
 	 */
 	@Override
-	public boolean execute(RequestProxy context) {
+	public boolean execute(RequestProxy request) {
 		Log.v(TAG, "Starting applying update task...");
 		try {
-			apply(context);
-			context.clearBundleUpdateInfo();
-			context.markedBundleUpdateStateTo(BundleUpdateState.APPLIED);
+			apply(request);
+			request.clearBundleUpdateInfo();
+			request.getApplicationProperties().setInt(TiAppUtil.PropertyKey.CURRENT_BUNDLE_VERSION, readAppBundleVersion(request));
+			request.markedBundleUpdateStateTo(BundleUpdateState.APPLIED);
 			Log.d(TAG, "Applying update done.");
 			return true;
-		} catch (IOException e) {
-			context.markedBundleUpdateStateTo(BundleUpdateState.INTERRUPTED);
+		} catch (Exception e) {
+			request.markedBundleUpdateStateTo(BundleUpdateState.INTERRUPTED);
 			Log.e("ApplyUpdateTask", "Failed to apply bundle update into main application.", e);
 		}
 		return false;
@@ -41,4 +46,7 @@ public class ApplyBundleUpdateOnlineTask implements Task {
 		new File(context.getBackupDirectory().getAbsolutePath()).renameTo(context.getApplicationResourcesDirectory());
 	}
 
+	private int readAppBundleVersion(RequestProxy request) throws IOException, ManifestParseException {
+		return (int) ManifestUtil.readBundleVersion(ManifestUtil.getBundleManifest(request.getApplicationResourcesDirectory()));
+	}
 }

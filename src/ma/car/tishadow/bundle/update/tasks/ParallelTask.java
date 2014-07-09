@@ -101,7 +101,8 @@ public class ParallelTask extends ArrayList<Task> implements Task {
 	}
 
 	private String getTag() {
-		return this.getClass().getSimpleName() + "-" + this.identifier;
+		String simpleName = this.getClass().getSimpleName();
+		return ("".equals(simpleName) ? "ParallelTask" : simpleName) + "-" + this.identifier;
 	}
 
 	/**

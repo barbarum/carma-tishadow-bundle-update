@@ -8,6 +8,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import ma.car.tishadow.bundle.update.BundleUpdateState;
 import ma.car.tishadow.bundle.update.RequestProxy;
 
 import org.appcelerator.kroll.common.Log;
@@ -75,7 +76,7 @@ public class DownloadBundleTask implements Task {
 		File destination = new File(context.getExternalApplicationTemporaryDirectory(), bundleLocalFileName);
 
 		DownloadManager.Request request = new DownloadManager.Request(Uri.parse(bundleDownloadUrl));
-		request.setShowRunningNotification(Log.isDebugModeEnabled()).setVisibleInDownloadsUi(Log.isDebugModeEnabled());
+		request.setShowRunningNotification(false).setVisibleInDownloadsUi(false);
 		request.setDestinationUri(Uri.fromFile(destination));
 		
 		long downloadId = downloadManager.enqueue(request);

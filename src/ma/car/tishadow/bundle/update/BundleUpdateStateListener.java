@@ -3,7 +3,6 @@
  */
 package ma.car.tishadow.bundle.update;
 
-import ma.car.tishadow.bundle.update.tasks.BundleUpdateState;
 
 /**
  * @author wei.ding
