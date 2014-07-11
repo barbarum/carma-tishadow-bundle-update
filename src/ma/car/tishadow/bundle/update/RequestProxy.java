@@ -318,6 +318,22 @@ public class RequestProxy extends KrollProxy {
 		getApplicationProperties().setInt(PropertyKey.UPDATE_VERSION_KEY, updateVersion);
 	}
 
+	/**
+	 * Gets ready-for-apply bundle version.
+	 * @return the version which is ready for apply to application resources, -1 if don't have any ready-for-apply directory.
+	 */
+	public long getReadyForApplyVersion() {
+		return getApplicationProperties().getInt(PropertyKey.UPDATE_VERSION_KEY, -1);
+	}
+
+	/**
+	 * Checks if the application is in the ready-for-apply state.
+	 * @return
+	 */
+	public boolean isReadyForApply() {
+		return getApplicationProperties().getBool(PropertyKey.UPDATE_READY_SIGN_KEY, false);
+	}
+
 	public static class Key {
 
 		/**

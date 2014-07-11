@@ -32,6 +32,10 @@ public class CheckBundleTask implements Task {
 	private boolean doExecute(RequestProxy context) {
 		String updateType = (String) context.getRequestProperty(RequestProxy.Key.UPDATE_TYPE);
 		logBundleInfo(context, updateType);
+		if (context.isReadyForApply() && context.getLatestBundleVerion() <= context.getReadyForApplyVersion()) {
+			Log.i(TAG, "A pending newer version is ready for apply to application resources, so going to discard current bundle updating process.");
+			return false;
+		}
 		if ("feature_toggle".equalsIgnoreCase(updateType)) {
 			if (!BundleUpdateManager.isLatestBundleApplied(context) && !BundleUpdateManager.isLatestBundleReadyForApply(context)) {
 				new ClearPendingUpdateTask().execute(context);
@@ -55,6 +59,7 @@ public class CheckBundleTask implements Task {
 		builder.append("\nUpdate type: " + updateType);
 		builder.append("\nLocal bundle: " + currentBundleVersion);
 		builder.append("\nLatest bundle:" + context.getLatestBundleVerion());
+		builder.append("\nUpdate Version:" + context.getReadyForApplyVersion() + ", Update Ready? : " + context.isReadyForApply());
 		builder.append("\nAppData Dir: " + context.getApplicationDataDirectory());
 		builder.append("\nAppTmp Dir: " + context.getExternalApplicationTemporaryDirectory());
 		builder.append("\nApplication Resources Dir: " + context.getApplicationResourcesDirectory());
