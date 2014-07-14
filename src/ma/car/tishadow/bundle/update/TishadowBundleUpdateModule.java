@@ -7,11 +7,6 @@
  */
 package ma.car.tishadow.bundle.update;
 
-import ma.car.tishadow.bundle.update.tasks.ApplyBundleUpdateOnlineTask;
-import ma.car.tishadow.bundle.update.tasks.BundleUpdateManager;
-import ma.car.tishadow.bundle.update.tasks.Task;
-import ma.car.tishadow.bundle.update.util.TiAppUtil;
-
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
