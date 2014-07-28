@@ -42,8 +42,12 @@ public class ApplyBundleUpdateOnlineTask implements Task {
 	}
 
 	private void apply(RequestProxy context) throws IOException {
+		File backupDirectory = new File(context.getBackupDirectory().getAbsolutePath());
+		File applicationResourceDirectory = context.getApplicationResourcesDirectory();
+		
 		FileUtils.deleteDirectory(context.getApplicationResourcesDirectory());
-		new File(context.getBackupDirectory().getAbsolutePath()).renameTo(context.getApplicationResourcesDirectory());
+		FileUtils.copyDirectory(backupDirectory, applicationResourceDirectory);
+		FileUtils.deleteDirectory(backupDirectory);
 	}
 
 	private int readAppBundleVersion(RequestProxy request) throws IOException, ManifestParseException {

@@ -20,7 +20,7 @@ public class TiAppUtil {
 	/**
 	 * Application data directory key.
 	 */
-	public static final String APPLICATION_DATA_DIRECTORY_KEY = "appData";
+	public static final String APPLICATION_DATA_DIRECTORY_KEY = "appdata";
 
 	/**
 	 * Application's persistent properties keys
