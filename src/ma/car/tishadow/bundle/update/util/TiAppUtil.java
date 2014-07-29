@@ -4,7 +4,9 @@
 package ma.car.tishadow.bundle.update.util;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The utility for current application.
@@ -12,10 +14,11 @@ import java.util.concurrent.Executors;
  */
 public class TiAppUtil {
 
+	public static final int MAXIMUM_POOL_SIZE = 8;
 	/**
 	 * Cached thread pool.
 	 */
-	public static ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
+	public static ExecutorService THREAD_POOL = new ThreadPoolExecutor(0, MAXIMUM_POOL_SIZE, 60L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
 
 	/**
 	 * Application data directory key.

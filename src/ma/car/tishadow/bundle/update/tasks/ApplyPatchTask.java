@@ -42,7 +42,7 @@ public class ApplyPatchTask implements Task {
 			// Update states into application properties, which are used by tishadow javascript side to retrieve update states and related information.
 			context.setBundleUpdateInfo();
 			context.markedBundleUpdateStateTo(BundleUpdateState.READY_FOR_APPLY);
-
+			
 			Log.d(TAG, "Apply Patch done.");
 			return true;
 		} catch (Exception e) {

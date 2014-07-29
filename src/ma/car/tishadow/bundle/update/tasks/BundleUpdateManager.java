@@ -7,10 +7,9 @@ import ma.car.tishadow.bundle.update.BundleUpdateState;
 import ma.car.tishadow.bundle.update.RequestProxy;
 import ma.car.tishadow.bundle.update.TishadowBundleUpdateModule;
 import ma.car.tishadow.bundle.update.util.TiAppUtil.PropertyKey;
+import ma.car.tishadow.bundle.update.util.AsyncTiProperties;
 
 import org.appcelerator.kroll.common.Log;
-import org.appcelerator.titanium.TiProperties;
-
 /**
  * TiShadow Bundle Update Manager
  * @author wei.ding
@@ -70,7 +69,7 @@ public class BundleUpdateManager implements Task {
 	 * @return true if applied, otherwise false
 	 */
 	public static boolean isLatestBundleApplied(RequestProxy context) {
-		TiProperties applicationProperties = context.getApplicationProperties();
+		AsyncTiProperties applicationProperties = context.getApplicationProperties();
 		long currentBundleVersion = applicationProperties.getInt(PropertyKey.CURRENT_BUNDLE_VERSION, -1);
 		long latestBundleVersion = context.getLatestBundleVerion();
 		return latestBundleVersion <= currentBundleVersion;
@@ -82,7 +81,7 @@ public class BundleUpdateManager implements Task {
 	 * @return true if applied, otherwise false
 	 */
 	public static boolean isLatestBundleReadyForApply(RequestProxy context) {
-		TiProperties applicationProperties = context.getApplicationProperties();
+		AsyncTiProperties applicationProperties = context.getApplicationProperties();
 		long readyForApplyVersion = applicationProperties.getInt(PropertyKey.UPDATE_VERSION_KEY, -1);
 		long latestBundleVersion = context.getLatestBundleVerion();
 		return latestBundleVersion == readyForApplyVersion;

@@ -42,6 +42,9 @@ public class DefaultBundleUpdateStateListener implements BundleUpdateStateListen
 				callAsync(requestContext, newState, RequestProxy.Key.ON_BUNDLE_DOWNLOADING_CALLBACK);
 				break;
 			case READY_FOR_APPLY:
+				if (requestContext.getForceUpdateRequiredListener() != null && isForceUpdateRequired(requestContext)) {
+					requestContext.getForceUpdateRequiredListener().onForceUpdateRequired();
+				}
 				callAsync(requestContext, newState, RequestProxy.Key.ON_BUNDLE_READY_FOR_APPLY_CALLBACK);
 				break;
 			case CHECKED:

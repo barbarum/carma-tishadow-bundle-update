@@ -42,12 +42,19 @@ public class ApplyBundleUpdateOnlineTask implements Task {
 	}
 
 	private void apply(RequestProxy context) throws IOException {
+
+		FileUtils.deleteDirectory(context.getApplicationResourcesDirectory());
+
 		File backupDirectory = new File(context.getBackupDirectory().getAbsolutePath());
 		File applicationResourceDirectory = context.getApplicationResourcesDirectory();
-		
-		FileUtils.deleteDirectory(context.getApplicationResourcesDirectory());
-		FileUtils.copyDirectory(backupDirectory, applicationResourceDirectory);
-		FileUtils.deleteDirectory(backupDirectory);
+		if (backupDirectory.renameTo(applicationResourceDirectory)) {
+			Log.d(TAG, backupDirectory + " has been renamed to " + applicationResourceDirectory);
+		} else {
+			Log.e(TAG, "Failed to rename to " + applicationResourceDirectory + " from " + backupDirectory + ", checking directories...");
+			Log.e(TAG, "standby directory exists ? " + backupDirectory.exists());
+			Log.e(TAG, "application resource directory exists ? " + applicationResourceDirectory.exists());
+		}
+
 	}
 
 	private int readAppBundleVersion(RequestProxy request) throws IOException, ManifestParseException {

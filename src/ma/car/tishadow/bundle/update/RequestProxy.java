@@ -12,6 +12,7 @@ import ma.car.tishadow.bundle.update.util.ManifestParseException;
 import ma.car.tishadow.bundle.update.util.ManifestUtil;
 import ma.car.tishadow.bundle.update.util.TiAppUtil;
 import ma.car.tishadow.bundle.update.util.TiAppUtil.PropertyKey;
+import ma.car.tishadow.bundle.update.util.AsyncTiProperties;
 
 import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.KrollFunction;
@@ -20,7 +21,6 @@ import org.appcelerator.kroll.KrollProxy;
 import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.TiContext;
-import org.appcelerator.titanium.TiProperties;
 
 import android.content.Context;
 
@@ -41,7 +41,7 @@ public class RequestProxy extends KrollProxy {
 
 	private Context applicationContext;
 
-	private TiProperties applicationProperties;
+	private AsyncTiProperties applicationProperties;
 
 	private HashMap<String, Object> properties;
 
@@ -59,19 +59,21 @@ public class RequestProxy extends KrollProxy {
 
 	private BundleUpdateStateListener onBundleUpdateStateChangedListener;
 
+	private ForceUpdateRequiredListener forceUpdateRequiredListener;
+
 	public RequestProxy(TiContext tiContext) {
 		this(tiContext.getActivity());
 	}
 
 	public RequestProxy(Context context) {
-		this(new TiProperties(context, TiApplication.APPLICATION_PREFERENCES_NAME, false));
+		this(new AsyncTiProperties(context, TiApplication.APPLICATION_PREFERENCES_NAME, false));
 		this.setApplicationContext(context);
 	}
 
 	/**
 	 * @param properties
 	 */
-	public RequestProxy(TiProperties properties) {
+	public RequestProxy(AsyncTiProperties properties) {
 		super();
 		this.applicationProperties = properties;
 	}
@@ -125,7 +127,7 @@ public class RequestProxy extends KrollProxy {
 	/**
 	 * @return the properties
 	 */
-	public TiProperties getApplicationProperties() {
+	public AsyncTiProperties getApplicationProperties() {
 		return applicationProperties;
 	}
 
@@ -290,6 +292,20 @@ public class RequestProxy extends KrollProxy {
 	}
 
 	/**
+	 * @return the forceUpdateRequiredListener
+	 */
+	public ForceUpdateRequiredListener getForceUpdateRequiredListener() {
+		return forceUpdateRequiredListener;
+	}
+
+	/**
+	 * @param forceUpdateRequiredListener the forceUpdateRequiredListener to set
+	 */
+	public void setForceUpdateRequiredListener(ForceUpdateRequiredListener forceUpdateRequiredListener) {
+		this.forceUpdateRequiredListener = forceUpdateRequiredListener;
+	}
+
+	/**
 	 * Gets latest bundle version from request parameter.
 	 * @return the value of 'latest_bundle_version' in request parameters, -1 if no such a parameter.
 	 * @throws NumberFormatException - if the value of 'latest_bundle_version' is not a number.
@@ -413,5 +429,10 @@ public class RequestProxy extends KrollProxy {
 		 * Internal key to get filename for the bundle which will be download shortly.
 		 */
 		public static final String DOWNLOAD_DESTINATION_FILENAME = "__download_destination_filename";
+	}
+
+	public interface ForceUpdateRequiredListener {
+
+		public void onForceUpdateRequired();
 	}
 }

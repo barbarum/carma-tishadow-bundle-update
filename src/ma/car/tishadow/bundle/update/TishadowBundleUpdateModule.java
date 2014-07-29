@@ -35,6 +35,8 @@ public class TishadowBundleUpdateModule extends KrollModule {
 	// Public methods
 	@Kroll.method
 	public void send(final KrollDict dict) {
+		Log.d(TAG, "Sending a bundle update request...");
+		
 		RequestProxy request = new RequestProxy(this.getActivity());
 
 		request.setJavascriptContext(getKrollObject());

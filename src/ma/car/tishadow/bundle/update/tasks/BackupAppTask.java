@@ -34,10 +34,10 @@ public class BackupAppTask implements Task {
 		Log.i(TAG, "Backup application resources '" + sourceDirectory + "' -> '" + backupDirectory + "'...");
 		try {
 			if (backupDirectory.exists()) {
-				FileUtils.cleanDirectory(backupDirectory);
+				FileUtils.deleteDirectory(backupDirectory);
 			}
 			if (sourceDirectory.exists()) {
-				FileUtils.copyDirectoryToDirectory(sourceDirectory, backupDirectory);
+				FileUtils.copyDirectory(sourceDirectory, backupDirectory);
 			}
 			Log.d(TAG, "Backup application resources done.");
 			return true;

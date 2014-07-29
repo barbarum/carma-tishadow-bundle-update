@@ -6,6 +6,7 @@ package ma.car.tishadow.bundle.update;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import ma.car.tishadow.bundle.update.RequestProxy.ForceUpdateRequiredListener;
 import ma.car.tishadow.bundle.update.tasks.ApplyBundleUpdateOnlineTask;
 import ma.car.tishadow.bundle.update.tasks.BundleUpdateManager;
 import ma.car.tishadow.bundle.update.tasks.DefaultBundleUpdateStateListener;
@@ -19,10 +20,17 @@ import android.util.Log;
  */
 public class BundleUpdateRequestHandler {
 
+	/**
+	 * 
+	 */
+	private static final String TAG = "BundleUpdateRequestHandler";
+
 	private AtomicBoolean handling = new AtomicBoolean(false);
 
 	private final LinkedBlockingQueue<RequestTaskEntry> queue;
+
 	private final BundleUpdateStateListener stateChangedListener;
+	private final RequestProxy.ForceUpdateRequiredListener forceUpdateRequiredListener;
 
 	private static class Singleton {
 
@@ -33,6 +41,15 @@ public class BundleUpdateRequestHandler {
 		super();
 		this.queue = new LinkedBlockingQueue<RequestTaskEntry>();
 		this.stateChangedListener = new DefaultBundleUpdateStateListener();
+
+		this.forceUpdateRequiredListener = new RequestProxy.ForceUpdateRequiredListener() {
+
+			@Override
+			public void onForceUpdateRequired() {
+				queue.clear();
+			}
+
+		};
 	}
 
 	/**
@@ -74,12 +91,13 @@ public class BundleUpdateRequestHandler {
 
 	private void handleRequest() {
 		if (!handling.compareAndSet(false, true)) {
-			Log.i("BundleUpdateRequestHandler", "There is a request in progress now, will wait for current request be handled.");
+			Log.i(TAG, "There is a request in progress now, will wait for current request be handled.");
 			return;
 		}
 		final RequestTaskEntry entry = this.queue.poll();
 		if (entry == null) {
-			Log.i("BundleUpdateRequestHandler", "Empty queue, will exit current round process.");
+			Log.i(TAG, "Empty queue, will exit current round process.");
+			handling.set(false);
 			return;
 		}
 		TiAppUtil.THREAD_POOL.execute(new Runnable() {
@@ -87,8 +105,10 @@ public class BundleUpdateRequestHandler {
 			@Override
 			public void run() {
 				entry.setOnBundleUpdateStateChangedListener(stateChangedListener);
+				entry.setForceUpdateRequiredListener(forceUpdateRequiredListener);
 				entry.execute();
 				entry.setOnBundleUpdateStateChangedListener(null);
+				entry.setForceUpdateRequiredListener(null);
 				handling.set(false);
 				handleRequest();
 			}
@@ -141,6 +161,14 @@ public class BundleUpdateRequestHandler {
 		 */
 		public void setOnBundleUpdateStateChangedListener(BundleUpdateStateListener onBundleUpdateStateChangedListener) {
 			request.setOnBundleUpdateStateChangedListener(onBundleUpdateStateChangedListener);
+		}
+
+		/**
+		 * @param forceUpdateRequiredListener
+		 * @see ma.car.tishadow.bundle.update.RequestProxy#setForceUpdateRequiredListener(ma.car.tishadow.bundle.update.RequestProxy.ForceUpdateRequiredListener)
+		 */
+		public void setForceUpdateRequiredListener(ForceUpdateRequiredListener forceUpdateRequiredListener) {
+			request.setForceUpdateRequiredListener(forceUpdateRequiredListener);
 		}
 
 	}
