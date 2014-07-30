@@ -24,7 +24,7 @@ public class CheckBundleTask implements Task {
 	public boolean execute(RequestProxy context) {
 		Log.v(TAG, "Start checking bundle task...");
 		Boolean result = doExecute(context);
-		context.markedBundleUpdateStateTo(result ? BundleUpdateState.CHECKED : BundleUpdateState.INTERRUPTED);
+		context.markedBundleUpdateStateTo(result ? BundleUpdateState.CHECKED : BundleUpdateState.IGNORED);
 		Log.d(TAG, "Check bundle task done.");
 		return result;
 	}

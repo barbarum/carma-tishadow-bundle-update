@@ -77,16 +77,9 @@ public class BundleUpdateRequestHandler {
 	 * @param request
 	 */
 	public void applyPendingUpdateOnline(final RequestProxy request) {
-		TiAppUtil.THREAD_POOL.execute(new Runnable() {
-
-			@Override
-			public void run() {
-				request.setOnBundleUpdateStateChangedListener(new DefaultBundleUpdateStateListener());
-				new ApplyBundleUpdateOnlineTask().execute(request);
-				request.setOnBundleUpdateStateChangedListener(null);
-			}
-
-		});
+		request.setOnBundleUpdateStateChangedListener(new DefaultBundleUpdateStateListener());
+		new ApplyBundleUpdateOnlineTask().execute(request);
+		request.setOnBundleUpdateStateChangedListener(null);
 	}
 
 	private void handleRequest() {

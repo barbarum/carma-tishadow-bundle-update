@@ -13,5 +13,6 @@ public enum BundleUpdateState {
 
 	STARTING,
 	DOWNLOADING,
-	APPLYING
+	APPLYING, 
+	IGNORED
 }
