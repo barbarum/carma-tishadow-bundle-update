@@ -74,10 +74,12 @@ public final class ManifestUtil {
 
 		PatchInfo patch = new PatchInfo();
 		for (Map.Entry<String, String> entry : newManifestMap.entrySet()) {
-			if (!oldManifestMap.containsKey(entry)) {
+			if (!oldManifestMap.containsKey(entry.getKey())) {
 				patch.getFilesToAdd().add(entry.getKey());
 			} else {
-				if (entry.getValue() != oldManifestMap.get(entry.getKey())) {
+				String newValue = "" + entry.getValue();
+				String oldValue = "" + oldManifestMap.get(entry.getKey());
+				if (!newValue.equals(oldValue)) {
 					patch.getFilesToUpdate().add(entry.getKey());
 				}
 				oldManifestMap.remove(entry.getKey());
