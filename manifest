@@ -12,7 +12,7 @@ copyright: 2014 Carma Inc.
 
 # these should not be edited
 name: tishadow-bundle-update
-moduleid: ma.car.tishadow.bundle.update
+moduleid: ma.car.carmaone.bundle.update
 guid: 58ce77ad-2c2f-4d0f-bee6-466f1e1e3eba
 platform: android
 minsdk: 3.2.0.GA
