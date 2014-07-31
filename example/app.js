@@ -13,7 +13,7 @@ win.add(label);
 win.open();
 
 // TODO: write your module tests here
-var module = require('ma.car.tishadow.bundle.update');
+var module = require('ma.car.carmaone.bundle.update');
 Ti.API.info("module is => " + module);
 
 label.text = module.example();

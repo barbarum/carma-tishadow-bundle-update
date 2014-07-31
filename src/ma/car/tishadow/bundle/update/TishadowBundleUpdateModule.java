@@ -13,7 +13,7 @@ import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.titanium.TiApplication;
 
-@Kroll.module(name = "TishadowBundleUpdate", id = "ma.car.tishadow.bundle.update")
+@Kroll.module(name = "TishadowBundleUpdate", id = "ma.car.carmaone.bundle.update")
 public class TishadowBundleUpdateModule extends KrollModule {
 
 	private static final String TAG = "TishadowBundleUpdateModule";

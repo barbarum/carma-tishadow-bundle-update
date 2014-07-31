@@ -8,7 +8,7 @@ TODO: Enter your module description here
 
 To access this module from JavaScript, you would do the following:
 
-	var tishadow-bundle-update = require("ma.car.tishadow.bundle.update");
+	var tishadow-bundle-update = require("ma.car.carmaone.bundle.update");
 
 The tishadow-bundle-update variable is a reference to the Module object.	
 
